@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Editor } from "@/components/Editor";
 import { uploadToBucket } from "@/lib/upload-client";
+import { parsePollOptions } from "@/lib/polls";
 import { createPost, updatePost, type AttachmentInput } from "@/app/(app)/actions";
 
 export interface PostFormLabels {
@@ -16,6 +17,9 @@ export interface PostFormLabels {
   submit: string;
   error: string;
   uploadImage: string;
+  pollQuestion: string;
+  pollOptions: string;
+  pollHint: string;
 }
 
 function isoToLocalInput(iso: string | null): string {
@@ -53,6 +57,8 @@ export function PostForm({
   const [dueResponse, setDueResponse] = useState(isoToLocalInput(initial?.dueAtResponse ?? null));
   const [dueReplies, setDueReplies] = useState(isoToLocalInput(initial?.dueAtReplies ?? null));
   const [files, setFiles] = useState<File[]>([]);
+  const [pollQuestion, setPollQuestion] = useState("");
+  const [pollOptionsRaw, setPollOptionsRaw] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -75,6 +81,7 @@ export function PostForm({
             const { path, size, mime } = await uploadToBucket("attachments", file, file.name);
             attachments.push({ path, filename: file.name, size, mime });
           }
+          const pollOptions = parsePollOptions(pollOptionsRaw);
           await createPost({
             title,
             groupId,
@@ -82,6 +89,10 @@ export function PostForm({
             dueAtResponse: localInputToIso(dueResponse),
             dueAtReplies: localInputToIso(dueReplies),
             attachments,
+            poll:
+              pollQuestion.trim() && pollOptions.length >= 2
+                ? { question: pollQuestion, options: pollOptions }
+                : null,
           });
         }
       } catch (err) {
@@ -179,6 +190,41 @@ export function PostForm({
             className="text-sm"
           />
         </div>
+      )}
+
+      {!postId && (
+        <fieldset className="border border-line rounded p-3 space-y-2">
+          <div>
+            <label htmlFor="poll-question" className="block text-sm font-medium mb-1">
+              📊 {labels.pollQuestion}
+            </label>
+            <input
+              id="poll-question"
+              value={pollQuestion}
+              onChange={(e) => setPollQuestion(e.target.value)}
+              maxLength={300}
+              className="w-full border border-line rounded px-3 py-2 bg-paper"
+            />
+          </div>
+          {pollQuestion.trim() && (
+            <div>
+              <label htmlFor="poll-options" className="block text-sm font-medium mb-1">
+                {labels.pollOptions}
+              </label>
+              <textarea
+                id="poll-options"
+                value={pollOptionsRaw}
+                onChange={(e) => setPollOptionsRaw(e.target.value)}
+                rows={4}
+                aria-describedby="poll-options-hint"
+                className="w-full border border-line rounded px-3 py-2 bg-paper text-sm"
+              />
+              <p id="poll-options-hint" className="text-xs text-ink-faint mt-1">
+                {labels.pollHint}
+              </p>
+            </div>
+          )}
+        </fieldset>
       )}
 
       <div>

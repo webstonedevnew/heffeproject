@@ -2,16 +2,22 @@ import type { Locale } from "@/types/db";
 
 const localeTag: Record<Locale, string> = { en: "en-GB", hu: "hu-HU" };
 
+// Servers run in UTC; the class lives in one timezone, so format all wall
+// clock times in it explicitly. Override with NEXT_PUBLIC_TIMEZONE if needed.
+const TIME_ZONE = process.env.NEXT_PUBLIC_TIMEZONE || "Europe/Budapest";
+
 export function formatDateTime(iso: string, locale: Locale = "en"): string {
   return new Intl.DateTimeFormat(localeTag[locale], {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: TIME_ZONE,
   }).format(new Date(iso));
 }
 
 export function formatDate(iso: string, locale: Locale = "en"): string {
   return new Intl.DateTimeFormat(localeTag[locale], {
     dateStyle: "medium",
+    timeZone: TIME_ZONE,
   }).format(new Date(iso));
 }
 

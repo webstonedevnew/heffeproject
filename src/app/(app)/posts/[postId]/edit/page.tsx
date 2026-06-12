@@ -43,6 +43,9 @@ export default async function EditPostPage({
           submit: t("post.update"),
           error: t("common.error"),
           uploadImage: t("post.uploadImage"),
+          pollQuestion: t("poll.questionLabel"),
+          pollOptions: t("poll.optionsLabel"),
+          pollHint: t("poll.optionsHint"),
         }}
       />
     </div>

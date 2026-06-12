@@ -164,6 +164,16 @@
     "yes": "igen",
     "no": "nem"
   },
+  "poll": {
+    "heading": "Szavazás",
+    "questionLabel": "Szavazás kérdése (nem kötelező)",
+    "optionsLabel": "Válaszlehetőségek",
+    "optionsHint": "Soronként egy lehetőség — legalább kettő.",
+    "vote": "Szavazok",
+    "changeVote": "Szavazat módosítása",
+    "totalVotes": "{count} szavazat",
+    "resultsHidden": "Szavazz, hogy lásd az eredményeket."
+  },
   "notifications": {
     "title": "Értesítések",
     "markAllRead": "Összes megjelölése olvasottként",

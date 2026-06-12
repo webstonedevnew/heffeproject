@@ -8,7 +8,9 @@ import { canModifyContent, type Actor } from "@/lib/permissions";
 import { loadParticipation } from "@/lib/participation-data";
 import { statusLine, statusComplete } from "@/lib/status";
 import { REQUIRED_PEER_REPLIES } from "@/lib/participation";
+import { tallyPoll } from "@/lib/polls";
 import { RichTextView } from "@/components/RichTextView";
+import { PollSection } from "@/components/PollSection";
 import { ReactionBar, type ReactionSummary } from "@/components/ReactionBar";
 import { CommentComposer, type ComposerLabels } from "@/components/CommentComposer";
 import { EditableBody } from "@/components/EditableBody";
@@ -155,6 +157,8 @@ function CommentCard({
               flagAction: t("common.flagAction"),
               reason: t("flagsPage.reason"),
               submit: t("common.flagAction"),
+              done: t("common.flagged"),
+              error: t("common.error"),
             }}
           />
         )}
@@ -269,6 +273,40 @@ export default async function PostPage({
   const actor: Actor = { id: profile.id, role: profile.role, status: profile.status };
   const hasDeadlines = post.due_at_response || post.due_at_replies;
 
+  // Optional poll attached to this post.
+  const { data: pollRow } = await supabase
+    .from("polls")
+    .select("id, question")
+    .eq("post_id", postId)
+    .maybeSingle();
+  let poll: {
+    id: string;
+    question: string;
+    tally: ReturnType<typeof tallyPoll>;
+  } | null = null;
+  if (pollRow) {
+    const [{ data: optionRows }, { data: voteRows }] = await Promise.all([
+      supabase
+        .from("poll_options")
+        .select("id, label")
+        .eq("poll_id", pollRow.id)
+        .order("position"),
+      supabase
+        .from("poll_votes")
+        .select("option_id, user_id")
+        .eq("poll_id", pollRow.id),
+    ]);
+    poll = {
+      id: pollRow.id,
+      question: pollRow.question,
+      tally: tallyPoll(
+        optionRows ?? [],
+        (voteRows ?? []).map((v) => ({ optionId: v.option_id, userId: v.user_id })),
+        profile.id
+      ),
+    };
+  }
+
   let myStatus = null;
   if (profile.role === "student" && hasDeadlines) {
     const { byPost } = await loadParticipation(supabase, [
@@ -347,6 +385,26 @@ export default async function PostPage({
           <RichTextView html={post.body_html} />
         </div>
 
+        {poll && (
+          <PollSection
+            pollId={poll.id}
+            postId={post.id}
+            question={poll.question}
+            results={poll.tally.results}
+            totalVotes={poll.tally.totalVotes}
+            myOptionId={poll.tally.myOptionId}
+            isTeacher={isTeacher}
+            labels={{
+              heading: t("poll.heading"),
+              vote: t("poll.vote"),
+              changeVote: t("poll.changeVote"),
+              totalVotes: t("poll.totalVotes", { count: poll.tally.totalVotes }),
+              resultsHidden: t("poll.resultsHidden"),
+              error: t("common.error"),
+            }}
+          />
+        )}
+
         {attachments.length > 0 && (
           <ul className="mt-4 space-y-1 text-sm">
             <li className="text-xs uppercase tracking-wide text-ink-faint">
@@ -401,6 +459,8 @@ export default async function PostPage({
                 flagAction: t("common.flagAction"),
                 reason: t("flagsPage.reason"),
                 submit: t("common.flagAction"),
+                done: t("common.flagged"),
+                error: t("common.error"),
               }}
             />
           )}

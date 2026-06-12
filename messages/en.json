@@ -164,6 +164,16 @@
     "yes": "yes",
     "no": "no"
   },
+  "poll": {
+    "heading": "Poll",
+    "questionLabel": "Poll question (optional)",
+    "optionsLabel": "Poll options",
+    "optionsHint": "One option per line — at least two.",
+    "vote": "Vote",
+    "changeVote": "Change my vote",
+    "totalVotes": "{count} votes",
+    "resultsHidden": "Vote to see the results."
+  },
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all as read",

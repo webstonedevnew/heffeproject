@@ -27,6 +27,7 @@ export async function createPost(input: {
   dueAtResponse: string | null;
   dueAtReplies: string | null;
   attachments: AttachmentInput[];
+  poll?: { question: string; options: string[] } | null;
 }) {
   const teacher = await requireTeacher();
   const supabase = await createClient();
@@ -68,6 +69,23 @@ export async function createPost(input: {
         mime_type: a.mime,
       }))
     );
+  }
+
+  if (input.poll && input.poll.question.trim() && input.poll.options.length >= 2) {
+    const { data: poll, error: pollError } = await supabase
+      .from("polls")
+      .insert({ post_id: post.id, question: input.poll.question.trim() })
+      .select("id")
+      .single();
+    if (!pollError && poll) {
+      await supabase.from("poll_options").insert(
+        input.poll.options.map((label, i) => ({
+          poll_id: poll.id,
+          label,
+          position: i,
+        }))
+      );
+    }
   }
 
   await notifyNewAssignment({
@@ -275,6 +293,19 @@ export async function flagContent(formData: FormData) {
   const reason = String(formData.get("reason") ?? "").slice(0, 500);
   const pagePostId = String(formData.get("pagePostId") ?? "");
 
+  // One open flag per user per target — repeated clicks are no-ops, so the
+  // teacher gets a single flag instead of a hundred.
+  let dupQuery = supabase
+    .from("flags")
+    .select("id")
+    .eq("flagged_by", profile.id)
+    .is("resolved_at", null);
+  dupQuery = postId
+    ? dupQuery.eq("post_id", postId)
+    : dupQuery.eq("comment_id", commentId!);
+  const { data: existing } = await dupQuery.limit(1);
+  if (existing && existing.length > 0) return;
+
   const { error } = await supabase.from("flags").insert({
     post_id: postId,
     comment_id: commentId,
@@ -296,6 +327,42 @@ export async function flagContent(formData: FormData) {
     });
   }
   revalidatePath(`/posts/${pagePostId || postId}`);
+}
+
+// ---------------------------------------------------------------------------
+// Polls
+// ---------------------------------------------------------------------------
+
+export async function votePoll(input: {
+  pollId: string;
+  optionId: string;
+  postId: string;
+}) {
+  const profile = await requireProfile();
+  const supabase = await createClient();
+
+  // Verify the option belongs to the poll (also enforced by a DB trigger).
+  const { data: option } = await supabase
+    .from("poll_options")
+    .select("id")
+    .eq("id", input.optionId)
+    .eq("poll_id", input.pollId)
+    .single();
+  if (!option) throw new Error("Invalid option");
+
+  // Single choice, changeable: replace any previous vote.
+  await supabase
+    .from("poll_votes")
+    .delete()
+    .eq("poll_id", input.pollId)
+    .eq("user_id", profile.id);
+  const { error } = await supabase.from("poll_votes").insert({
+    poll_id: input.pollId,
+    option_id: input.optionId,
+    user_id: profile.id,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath(`/posts/${input.postId}`);
 }
 
 // ---------------------------------------------------------------------------
