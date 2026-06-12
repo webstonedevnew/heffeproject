@@ -199,6 +199,7 @@
     "invitesSent": "{count} meghívó elküldve.",
     "invalidSkipped": "Érvénytelen elemek kihagyva: {list}",
     "pendingInvites": "Függőben lévő meghívók",
+    "inviteLink": "Meghívó link — másold ki és küldd el a diáknak, ha az e-mail-küldés még nincs beállítva:",
     "expired": "lejárt",
     "resend": "Újraküldés",
     "revoke": "Visszavonás",

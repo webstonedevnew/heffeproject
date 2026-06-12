@@ -18,7 +18,7 @@ export async function fetchPostCards(
   let query = supabase
     .from("posts")
     .select(
-      "id, title, body_text, due_at_response, due_at_replies, pinned, hidden_at, created_at, group:groups(name), author:profiles(name)"
+      "id, title, body_text, due_at_response, due_at_replies, pinned, hidden_at, created_at, group:groups(name), author:profiles!posts_author_id_fkey(name)"
     )
     .order("pinned", { ascending: false })
     .order("created_at", { ascending: false })

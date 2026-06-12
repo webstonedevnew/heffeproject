@@ -37,7 +37,7 @@ export default async function FlagsPage({
   let query = supabase
     .from("flags")
     .select(
-      "id, post_id, comment_id, reason, resolved_at, created_at, flagger:profiles!flags_flagged_by_fkey(name), post:posts(id, title), comment:comments(id, post_id, body_text, author:profiles(name))"
+      "id, post_id, comment_id, reason, resolved_at, created_at, flagger:profiles!flags_flagged_by_fkey(name), post:posts(id, title), comment:comments(id, post_id, body_text, author:profiles!comments_author_id_fkey(name))"
     )
     .order("created_at", { ascending: false })
     .limit(50);

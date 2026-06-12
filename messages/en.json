@@ -199,6 +199,7 @@
     "invitesSent": "{count} invite(s) sent.",
     "invalidSkipped": "Skipped invalid entries: {list}",
     "pendingInvites": "Pending invites",
+    "inviteLink": "Invite link — copy it and send it to the student yourself if email sending isn't set up:",
     "expired": "expired",
     "resend": "Resend",
     "revoke": "Revoke",

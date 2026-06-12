@@ -89,6 +89,8 @@ export default async function StudentsPage({
           <ul className="space-y-1">
             {invites.map((invite) => {
               const expired = new Date(invite.expires_at).getTime() <= now;
+              const base = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
+              const inviteUrl = `${base}/invite/${invite.token}`;
               return (
                 <li
                   key={invite.id}
@@ -98,6 +100,14 @@ export default async function StudentsPage({
                   {expired && (
                     <span className="text-xs text-warn uppercase">{t("students.expired")}</span>
                   )}
+                  <label className="basis-full order-last text-xs text-ink-faint">
+                    {t("students.inviteLink")}
+                    <input
+                      readOnly
+                      value={inviteUrl}
+                      className="w-full border border-line rounded px-2 py-1 mt-0.5 bg-paper text-ink-soft font-mono text-[11px]"
+                    />
+                  </label>
                   <span className="ml-auto flex gap-3 text-xs">
                     <ConfirmButton
                       action={resendInvite.bind(null, invite.id)}

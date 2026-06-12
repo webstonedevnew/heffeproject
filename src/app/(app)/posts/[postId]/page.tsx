@@ -212,7 +212,7 @@ export default async function PostPage({
 
   const { data: postRow } = await supabase
     .from("posts")
-    .select("*, group:groups(slug, name), author:profiles(name)")
+    .select("*, group:groups(slug, name), author:profiles!posts_author_id_fkey(name)")
     .eq("id", postId)
     .single();
   if (!postRow) notFound();
@@ -236,7 +236,7 @@ export default async function PostPage({
   const [{ data: commentRows }, { data: attachmentRows }] = await Promise.all([
     supabase
       .from("comments")
-      .select("*, author:profiles(name, role)")
+      .select("*, author:profiles!comments_author_id_fkey(name, role)")
       .eq("post_id", postId)
       .order("created_at"),
     supabase.from("attachments").select("*").eq("post_id", postId),
