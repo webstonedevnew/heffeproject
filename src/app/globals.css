@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  /* Editorial palette: warm paper, dark ink, oxblood accent. */
+  --color-paper: #faf7f2;
+  --color-paper-deep: #f1ebe1;
+  --color-card: #fffdf9;
+  --color-ink: #1f1b16;
+  --color-ink-soft: #57504a;
+  --color-ink-faint: #8d8479;
+  --color-line: #e3dccf;
+  --color-accent: #7c2d2d;
+  --color-accent-soft: #f4e3e3;
+  --color-gold: #9a7b2d;
+  --color-sage: #3d6b4f;
+  --color-sage-soft: #e2ece6;
+  --color-warn: #b45309;
+  --color-warn-soft: #fdf0e0;
+
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    "Times New Roman", serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Arial, sans-serif;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-serif);
+}
+
+/* Rendered rich text (posts & comments) */
+.prose-tok {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.prose-tok h2 { font-family: var(--font-serif); font-size: 1.25rem; margin: 1.2em 0 0.4em; }
+.prose-tok h3 { font-family: var(--font-serif); font-size: 1.1rem; margin: 1em 0 0.3em; }
+.prose-tok p { margin: 0.6em 0; }
+.prose-tok a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+.prose-tok ul { list-style: disc; padding-left: 1.4em; margin: 0.6em 0; }
+.prose-tok ol { list-style: decimal; padding-left: 1.4em; margin: 0.6em 0; }
+.prose-tok blockquote {
+  border-left: 3px solid var(--color-line);
+  padding-left: 1em;
+  color: var(--color-ink-soft);
+  font-style: italic;
+  margin: 0.8em 0;
+}
+.prose-tok img { max-width: 100%; border-radius: 4px; margin: 0.8em 0; }
+.prose-tok code {
+  background: var(--color-paper-deep);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+.prose-tok pre {
+  background: var(--color-paper-deep);
+  padding: 0.8em 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0.8em 0;
+}
+
+/* Tiptap editor */
+.tiptap {
+  min-height: 7rem;
+  outline: none;
+  padding: 0.75rem 1rem;
+}
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--color-ink-faint);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* Accessible focus */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
