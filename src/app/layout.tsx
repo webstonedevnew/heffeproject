@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { DecorativeBackground } from "@/components/DecorativeBackground";
 
 export const metadata: Metadata = {
   title: { default: "TOK Journal", template: "%s · TOK Journal" },
@@ -17,7 +18,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        <DecorativeBackground />
+        {children}
+      </body>
     </html>
   );
 }

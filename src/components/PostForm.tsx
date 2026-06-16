@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Editor } from "@/components/Editor";
+import { Spinner } from "@/components/Spinner";
 import { uploadToBucket } from "@/lib/upload-client";
 import { parsePollOptions } from "@/lib/polls";
 import { createPost, updatePost, type AttachmentInput } from "@/app/(app)/actions";
@@ -266,9 +267,10 @@ export function PostForm({
           type="button"
           onClick={submit}
           disabled={pending || !title.trim() || !bodyHtml}
-          className="bg-ink text-paper rounded px-5 py-2.5 font-medium hover:bg-accent transition-colors disabled:opacity-40"
+          className="inline-flex items-center gap-1.5 bg-ink text-paper rounded px-5 py-2.5 font-medium hover:bg-accent transition-colors disabled:opacity-40"
         >
-          {pending ? "…" : labels.submit}
+          {pending && <Spinner />}
+          {labels.submit}
         </button>
         {error && (
           <p role="alert" className="text-sm text-accent mt-2">

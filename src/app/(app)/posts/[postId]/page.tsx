@@ -423,7 +423,7 @@ export default async function PostPage({
         </Link>
       </nav>
 
-      <article className="bg-card border border-line rounded-lg p-4 sm:p-6">
+      <article className="animate-fade-in-up bg-card border border-line rounded-lg p-4 sm:p-6">
         <header>
           <div className="flex flex-wrap items-center gap-2 mb-2">
             {cohortLabel && (

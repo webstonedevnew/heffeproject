@@ -35,7 +35,24 @@ export default async function AppLayout({
       <header className="border-b border-line bg-card/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-between py-3">
-            <Link href="/" className="font-display text-2xl tracking-tight">
+            <Link
+              href="/"
+              className="group font-display text-2xl tracking-tight inline-flex items-center gap-1.5"
+            >
+              <svg
+                aria-hidden="true"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                className="text-accent transition-transform duration-500 group-hover:rotate-90"
+              >
+                {/* a small four-point ink star — the journal's "mark" */}
+                <path
+                  d="M12 1 C13 8, 16 11, 23 12 C16 13, 13 16, 12 23 C11 16, 8 13, 1 12 C8 11, 11 8, 12 1 Z"
+                  fill="currentColor"
+                  fillOpacity="0.85"
+                />
+              </svg>
               {t("common.appName")}
             </Link>
             <div className="flex items-center gap-2 text-sm">

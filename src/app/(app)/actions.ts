@@ -169,7 +169,10 @@ export async function createComment(input: {
   const bodyHtml = sanitizeRichText(input.bodyHtml);
   const bodyText = htmlToText(bodyHtml);
   const attachments = input.attachments ?? [];
-  if (!bodyText && !input.audioPath && attachments.length === 0) {
+  // A reply can be just a picture: an inline pasted/dropped image (an <img> in
+  // the body) or an attached file counts as content even with no text.
+  const hasInlineImage = /<img\b/i.test(bodyHtml);
+  if (!bodyText && !input.audioPath && attachments.length === 0 && !hasInlineImage) {
     throw new Error("Empty comment");
   }
 

@@ -31,8 +31,13 @@ third-party assets — GDPR-first for minors' data.
   deadline pair (own response due Friday, peer replies due Sunday), reactions,
   unique view counts.
 - **Responses & replies** — students respond with rich text (one level of
-  threading), can attach a recorded **voice reply** and **pictures/files**,
+  threading), can attach a recorded **voice reply** and **pictures/files**
+  (file picker, or **paste / drag-and-drop** an image straight into the text),
   edit their own posts for 30 minutes, and flag content for the teacher.
+- **Feel** — tasteful motion (button presses, staggered card entrances, a top
+  loading bar, spinners on pending actions) and a subtle hand-made backdrop of
+  abstract, on-palette "ink-blot" shapes. All CSS/inline-SVG (no third-party
+  assets) and disabled under `prefers-reduced-motion`.
 - **Participation dashboard** (teacher-only) — per assignment: who posted
   their own response (and when, with late flags) and who replied to ≥2
   classmates. CSV export. Students only ever see their own status

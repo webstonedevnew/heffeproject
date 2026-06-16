@@ -68,7 +68,7 @@ export default async function HomePage({
           {t("home.noPosts")}
         </p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 stagger">
           {cards.map((card) => (
             <PostCard key={card.id} {...card} />
           ))}
