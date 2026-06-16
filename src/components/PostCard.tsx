@@ -22,6 +22,8 @@ export interface PostCardProps {
   myStatus: StudentParticipation | null;
   /** Teacher-side summary, e.g. "12/20 students complete". */
   teacherSummary?: string | null;
+  /** Year-group label shown to the teacher (e.g. "Grade 11"); null hides it. */
+  cohortLabel?: string | null;
 }
 
 export function PostCard(props: PostCardProps) {
@@ -32,6 +34,11 @@ export function PostCard(props: PostCardProps) {
     <article className="bg-card border border-line rounded-lg p-4 sm:p-5 hover:border-ink-faint transition-colors">
       <div className="flex items-center gap-2 text-xs text-ink-faint uppercase tracking-wide">
         <span>{props.groupName}</span>
+        {props.cohortLabel && (
+          <span className="normal-case rounded-full bg-paper-deep text-ink-soft px-2 py-0.5">
+            {props.cohortLabel}
+          </span>
+        )}
         {props.pinned && <span aria-label="pinned">📌</span>}
         {props.hidden && (
           <span className="text-warn normal-case">({t("post.hiddenTag")})</span>

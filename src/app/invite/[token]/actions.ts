@@ -62,6 +62,7 @@ export async function acceptInvite(formData: FormData) {
     name,
     email: invite.email.toLowerCase(),
     status: "active",
+    cohort_id: invite.cohort_id,
   });
   if (profileError) {
     console.error("profile upsert failed:", profileError.message);

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sanitizeRichText, htmlToText, excerpt } from "@/lib/sanitize";
 import { notifyNewAssignment, notifyReply, notifyFlag } from "@/lib/notify";
+import { getCohorts, normalizeCohortId } from "@/lib/cohorts-data";
 import type { Comment, Post } from "@/types/db";
 
 export interface AttachmentInput {
@@ -23,6 +24,7 @@ export interface AttachmentInput {
 export async function createPost(input: {
   title: string;
   groupId: string;
+  cohortId: string | null;
   bodyHtml: string;
   dueAtResponse: string | null;
   dueAtReplies: string | null;
@@ -36,6 +38,10 @@ export async function createPost(input: {
   if (!title) throw new Error("Title is required");
   const bodyHtml = sanitizeRichText(input.bodyHtml);
 
+  // Resolve the target year group (null = shared with every cohort).
+  const cohorts = await getCohorts(supabase);
+  const cohortId = normalizeCohortId(cohorts, input.cohortId);
+
   const { data: group } = await supabase
     .from("groups")
     .select("id, slug, name")
@@ -48,6 +54,7 @@ export async function createPost(input: {
     .insert({
       group_id: group.id,
       author_id: teacher.id,
+      cohort_id: cohortId,
       title,
       body_html: bodyHtml,
       body_text: htmlToText(bodyHtml),
@@ -90,6 +97,7 @@ export async function createPost(input: {
 
   await notifyNewAssignment({
     post,
+    cohortId,
     groupSlug: group.slug,
     groupName: group.name,
     teacherName: teacher.name,
@@ -153,13 +161,17 @@ export async function createComment(input: {
   parentCommentId: string | null;
   bodyHtml: string;
   audioPath: string | null;
+  attachments?: AttachmentInput[];
 }) {
   const profile = await requireProfile();
   const supabase = await createClient();
 
   const bodyHtml = sanitizeRichText(input.bodyHtml);
   const bodyText = htmlToText(bodyHtml);
-  if (!bodyText && !input.audioPath) throw new Error("Empty comment");
+  const attachments = input.attachments ?? [];
+  if (!bodyText && !input.audioPath && attachments.length === 0) {
+    throw new Error("Empty comment");
+  }
 
   const { data: comment, error } = await supabase
     .from("comments")
@@ -174,6 +186,21 @@ export async function createComment(input: {
     .select("id")
     .single();
   if (error) throw new Error(error.message);
+
+  // Pictures (and any other files) attached to this response/reply.
+  if (attachments.length > 0) {
+    const { error: attachError } = await supabase.from("attachments").insert(
+      attachments.map((a) => ({
+        comment_id: comment.id,
+        uploader_id: profile.id,
+        storage_path: a.path,
+        filename: a.filename,
+        size_bytes: a.size,
+        mime_type: a.mime,
+      }))
+    );
+    if (attachError) throw new Error(attachError.message);
+  }
 
   // Notify the author of the parent comment (someone replied to you).
   if (input.parentCommentId) {

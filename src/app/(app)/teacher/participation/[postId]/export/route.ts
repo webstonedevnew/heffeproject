@@ -19,12 +19,13 @@ export async function GET(
 
   const { data: post } = await supabase
     .from("posts")
-    .select("id, title, due_at_response, due_at_replies")
+    .select("id, title, due_at_response, due_at_replies, cohort_id")
     .eq("id", postId)
     .single();
   if (!post) return new NextResponse("Not found", { status: 404 });
 
-  const { students, byPost } = await loadParticipation(supabase, [post]);
+  const { rosterByPost, byPost } = await loadParticipation(supabase, [post]);
+  const roster = rosterByPost.get(post.id) ?? [];
   const participation = byPost.get(post.id)!;
 
   const yes = t("participation.yes");
@@ -39,7 +40,7 @@ export async function GET(
       t("participation.csvRepliesDone"),
       t("participation.csvRepliesLate"),
     ],
-    ...students.map((s) => {
+    ...roster.map((s) => {
       const p = participation.get(s.id)!;
       return [
         s.name,

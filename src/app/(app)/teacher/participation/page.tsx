@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/i18n";
 import { formatDateTime } from "@/lib/format";
 import { loadParticipation } from "@/lib/participation-data";
+import { getCohorts } from "@/lib/cohorts-data";
+import { cohortName } from "@/lib/cohorts";
 import { statusComplete } from "@/lib/status";
 import { REQUIRED_PEER_REPLIES } from "@/lib/participation";
 
@@ -18,27 +20,33 @@ export default async function ParticipationPage({
   const supabase = await createClient();
   const { post: postParam } = await searchParams;
 
-  const { data: postRows } = await supabase
-    .from("posts")
-    .select("id, title, due_at_response, due_at_replies, created_at, group:groups(name)")
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const [{ data: postRows }, cohorts] = await Promise.all([
+    supabase
+      .from("posts")
+      .select("id, title, due_at_response, due_at_replies, created_at, cohort_id, group:groups(name)")
+      .order("created_at", { ascending: false })
+      .limit(50),
+    getCohorts(supabase),
+  ]);
   const posts = (postRows ?? []) as unknown as {
     id: string;
     title: string;
     due_at_response: string | null;
     due_at_replies: string | null;
     created_at: string;
+    cohort_id: string | null;
     group: { name: string } | null;
   }[];
+  const allGradesLabel = t("cohorts.allGrades");
 
   const selected = posts.find((p) => p.id === postParam) ?? posts[0] ?? null;
 
   let table: React.ReactNode = null;
   if (selected) {
-    const { students, byPost } = await loadParticipation(supabase, [selected]);
+    const { rosterByPost, byPost } = await loadParticipation(supabase, [selected]);
+    const roster = rosterByPost.get(selected.id) ?? [];
     const participation = byPost.get(selected.id)!;
-    const completeCount = students.filter((s) =>
+    const completeCount = roster.filter((s) =>
       statusComplete(participation.get(s.id)!)
     ).length;
 
@@ -53,6 +61,7 @@ export default async function ParticipationPage({
             </h2>
             <p className="text-xs text-ink-faint mt-0.5">
               {selected.group?.name} ·{" "}
+              {cohortName(cohorts, selected.cohort_id, allGradesLabel)} ·{" "}
               {selected.due_at_response
                 ? t("post.ownResponseDue", {
                     date: formatDateTime(selected.due_at_response, locale),
@@ -70,7 +79,7 @@ export default async function ParticipationPage({
             <span className="text-sm font-medium px-2 py-1 rounded bg-paper-deep">
               {t("participation.complete", {
                 done: completeCount,
-                total: students.length,
+                total: roster.length,
               })}
             </span>
             <a
@@ -98,7 +107,7 @@ export default async function ParticipationPage({
               </tr>
             </thead>
             <tbody>
-              {students.map((s) => {
+              {roster.map((s) => {
                 const p = participation.get(s.id)!;
                 return (
                   <tr key={s.id} className="border-b border-line/60 last:border-0">
@@ -175,7 +184,8 @@ export default async function ParticipationPage({
             >
               {posts.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.group?.name ? `[${p.group.name}] ` : ""}
+                  {`[${cohortName(cohorts, p.cohort_id, allGradesLabel)}] `}
+                  {p.group?.name ? `${p.group.name} · ` : ""}
                   {p.title}
                 </option>
               ))}

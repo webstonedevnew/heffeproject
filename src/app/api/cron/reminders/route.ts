@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
   const { data: postRows } = await admin
     .from("posts")
-    .select("id, title, due_at_response, due_at_replies")
+    .select("id, title, due_at_response, due_at_replies, cohort_id")
     .is("hidden_at", null)
     .or(
       `and(due_at_response.gte.${nowIso},due_at_response.lte.${windowEnd}),and(due_at_replies.gte.${nowIso},due_at_replies.lte.${windowEnd})`
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ processed: 0, remindersSent: 0 });
   }
 
-  const { students, byPost } = await loadParticipation(admin, posts);
+  const { students, rosterByPost, byPost } = await loadParticipation(admin, posts);
   const { data: profileRows } = await admin
     .from("profiles")
     .select("*")
@@ -67,9 +67,11 @@ export async function GET(request: NextRequest) {
       work.push({ kind: "replies", dueAt: post.due_at_replies! });
     }
 
+    // Only remind the students this post concerns (its cohort).
+    const roster = rosterByPost.get(post.id) ?? [];
     for (const { kind, dueAt } of work) {
       processed++;
-      for (const student of students) {
+      for (const student of roster) {
         const p = participation.get(student.id);
         if (!p) continue;
         const incomplete = kind === "response" ? !p.responded : !p.repliesDone;

@@ -37,6 +37,10 @@
     "privacy": "Privacy",
     "teacherTools": "Teacher tools"
   },
+  "cohorts": {
+    "allGrades": "All grades",
+    "filterLabel": "Filter by grade"
+  },
   "auth": {
     "signInTitle": "Sign in",
     "signInIntro": "Enter your school email and we will send you a sign-in link. No password needed.",
@@ -115,7 +119,9 @@
     "submitResponse": "Post response",
     "alreadyResponded": "You have posted your response. Now reply to at least {count} classmates.",
     "deleted": "Assignment deleted.",
-    "uploadImage": "Insert image"
+    "uploadImage": "Insert image",
+    "cohortLabel": "Year group",
+    "cohortHint": "Only this year group sees the assignment. Choose “All grades” to share it with everyone."
   },
   "comments": {
     "responsesHeading": "Responses",
@@ -132,6 +138,8 @@
     "audioAttached": "Voice recording attached",
     "audioReply": "Voice reply",
     "micDenied": "Microphone access was blocked. Check your browser permissions.",
+    "addImages": "Add pictures",
+    "removeImage": "Remove picture",
     "empty": "No responses yet. Be the first!"
   },
   "participation": {
@@ -205,6 +213,8 @@
     "title": "Students",
     "inviteTitle": "Invite students",
     "inviteHint": "Paste one or more email addresses — separated by commas, spaces or new lines.",
+    "inviteCohort": "Year group",
+    "cohortLabel": "Year group",
     "sendInvites": "Send invites",
     "invitesSent": "{count} invite(s) sent.",
     "invalidSkipped": "Skipped invalid entries: {list}",
