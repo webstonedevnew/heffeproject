@@ -24,6 +24,7 @@ export default async function EditPostPage({
       <h1 className="font-display text-2xl mb-4">{t("post.editPost")}</h1>
       <PostForm
         groups={[]}
+        cohorts={[]}
         postId={post.id}
         initial={{
           title: post.title,
@@ -36,6 +37,9 @@ export default async function EditPostPage({
           title: t("post.titleLabel"),
           body: t("post.bodyLabel"),
           group: t("post.groupLabel"),
+          cohort: t("post.cohortLabel"),
+          cohortHint: t("post.cohortHint"),
+          allGrades: t("cohorts.allGrades"),
           dueResponse: t("post.dueResponseLabel"),
           dueReplies: t("post.dueRepliesLabel"),
           dueHint: t("post.dueHint"),

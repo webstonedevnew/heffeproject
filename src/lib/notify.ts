@@ -29,19 +29,28 @@ async function insertNotifications(
   if (error) console.error("notification insert failed:", error.message);
 }
 
-/** New assignment → every active student, in-app + email per preference. */
+/**
+ * New assignment → the active students it concerns, in-app + email per
+ * preference. A cohort-targeted post reaches only that year group; a shared
+ * post (cohortId null) reaches everyone.
+ */
 export async function notifyNewAssignment(opts: {
   post: { id: string; title: string };
+  cohortId: string | null;
   groupSlug: string;
   groupName: string;
   teacherName: string;
 }) {
   const admin = createAdminClient();
-  const { data: students } = await admin
+  let studentsQuery = admin
     .from("profiles")
     .select("*")
     .eq("role", "student")
     .eq("status", "active");
+  if (opts.cohortId !== null) {
+    studentsQuery = studentsQuery.eq("cohort_id", opts.cohortId);
+  }
+  const { data: students } = await studentsQuery;
   const recipients = (students ?? []) as Profile[];
 
   const payload: Payload = {

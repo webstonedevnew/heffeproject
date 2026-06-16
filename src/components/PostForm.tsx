@@ -10,6 +10,9 @@ export interface PostFormLabels {
   title: string;
   body: string;
   group: string;
+  cohort: string;
+  cohortHint: string;
+  allGrades: string;
   dueResponse: string;
   dueReplies: string;
   dueHint: string;
@@ -35,11 +38,13 @@ function localInputToIso(value: string): string | null {
 
 export function PostForm({
   groups,
+  cohorts,
   labels,
   postId,
   initial,
 }: {
   groups: { id: string; name: string }[];
+  cohorts: { id: string; name: string }[];
   labels: PostFormLabels;
   /** When set, the form edits an existing post. */
   postId?: string;
@@ -53,6 +58,9 @@ export function PostForm({
 }) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [groupId, setGroupId] = useState(initial?.groupId ?? groups[0]?.id ?? "");
+  // "" = all grades (shared). Default to the first grade so a post is targeted
+  // unless the teacher deliberately chooses to share it with everyone.
+  const [cohortId, setCohortId] = useState(cohorts[0]?.id ?? "");
   const [bodyHtml, setBodyHtml] = useState(initial?.bodyHtml ?? "");
   const [dueResponse, setDueResponse] = useState(isoToLocalInput(initial?.dueAtResponse ?? null));
   const [dueReplies, setDueReplies] = useState(isoToLocalInput(initial?.dueAtReplies ?? null));
@@ -85,6 +93,7 @@ export function PostForm({
           await createPost({
             title,
             groupId,
+            cohortId: cohortId || null,
             bodyHtml,
             dueAtResponse: localInputToIso(dueResponse),
             dueAtReplies: localInputToIso(dueReplies),
@@ -136,6 +145,31 @@ export function PostForm({
               </option>
             ))}
           </select>
+        </div>
+      )}
+
+      {!postId && cohorts.length > 0 && (
+        <div>
+          <label htmlFor="post-cohort" className="block text-sm font-medium mb-1">
+            {labels.cohort}
+          </label>
+          <select
+            id="post-cohort"
+            value={cohortId}
+            onChange={(e) => setCohortId(e.target.value)}
+            aria-describedby="post-cohort-hint"
+            className="w-full border border-line rounded px-3 py-2 bg-paper"
+          >
+            {cohorts.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+            <option value="">{labels.allGrades}</option>
+          </select>
+          <p id="post-cohort-hint" className="text-xs text-ink-faint mt-1">
+            {labels.cohortHint}
+          </p>
         </div>
       )}
 

@@ -15,16 +15,24 @@ third-party assets — GDPR-first for minors' data.
 
 - **Closed registration** — the teacher invites by email (single or bulk
   paste); students join via invite link. Magic-link login is primary,
-  password optional.
+  password optional. Each invite (and student) is assigned a **year group**.
+- **Cohorts (year groups)** — one deployment serves several grades on a single
+  domain (seeded with **Grade 11** and **Grade 12**). A student only ever sees
+  their own grade's assignments, responses and search results; an 11th-grader
+  can't see 12th-grade content and vice versa. The teacher sees and manages
+  every cohort, picks a target grade per assignment (or "All grades" to share
+  one), and can filter the feed by grade. Separation is enforced in Postgres
+  RLS, so it holds even against a direct API call.
 - **Groups** — seeded with the ten TOK themes (Knowledge and the Knower …
   Coffee Corner). Teacher can create / rename / archive. Everyone is a member
-  of every group.
+  of every group; the *content* inside a group is still split by cohort.
 - **Assignment threads** — teacher-only top-level posts: rich text (headings,
-  bold, links, embedded images), attachments, optional deadline pair (own
-  response due Friday, peer replies due Sunday), reactions, unique view counts.
+  bold, links, embedded images), attachments, a target cohort, optional
+  deadline pair (own response due Friday, peer replies due Sunday), reactions,
+  unique view counts.
 - **Responses & replies** — students respond with rich text (one level of
-  threading), can attach a recorded **voice reply**, edit their own posts for
-  30 minutes, and flag content for the teacher.
+  threading), can attach a recorded **voice reply** and **pictures/files**,
+  edit their own posts for 30 minutes, and flag content for the teacher.
 - **Participation dashboard** (teacher-only) — per assignment: who posted
   their own response (and when, with late flags) and who replied to ≥2
   classmates. CSV export. Students only ever see their own status
@@ -70,9 +78,10 @@ third-party assets — GDPR-first for minors' data.
    supabase db push
    ```
 
-   …or by pasting `supabase/migrations/0001_schema.sql` then
-   `0002_rls.sql` into the SQL editor (in that order). This also creates the
-   private `attachments` and `audio` buckets.
+   …or by pasting the files in `supabase/migrations/` into the SQL editor **in
+   order** — `0001_schema.sql`, `0002_rls.sql`, `0003_polls_and_search.sql`,
+   then `0004_cohorts.sql`. This also creates the private `attachments` and
+   `audio` buckets and seeds the Grade 11 / Grade 12 cohorts.
 3. **Auth settings** (Dashboard → Authentication):
    - *Sign In / Up*: disable **"Allow new users to sign up"** (registration is
      closed; the app provisions accounts via invites).
@@ -206,7 +215,17 @@ src/
 
 ## Known limitations (deliberate MVP cuts)
 
-- Attachments can be added when creating a post, not when editing one.
+- Post-level attachments can be added when creating a post, not when editing
+  one. (Responses and replies can attach pictures/files at any time they're
+  written.)
+- A post's target cohort is chosen at creation and isn't re-assignable from the
+  edit screen (moving an assignment between grades after students have replied
+  would orphan those replies).
+- Uploaded files live behind an authenticated proxy with unguessable paths but
+  the storage bucket itself is readable by any signed-in member, so cross-cohort
+  isolation of the *raw files* relies on those paths never being shared (the
+  cohort-gated `attachments` rows are what stop a student discovering them). The
+  same model already governs voice replies.
 - Deactivating a student blocks them at the next request (sessions aren't
   force-revoked server-side; they expire naturally).
 - Search uses the `simple` text-search configuration so Hungarian and English

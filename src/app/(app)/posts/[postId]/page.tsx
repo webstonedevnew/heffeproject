@@ -6,6 +6,8 @@ import { getT, type Translator } from "@/lib/i18n";
 import { formatDateTime, timeAgo } from "@/lib/format";
 import { canModifyContent, type Actor } from "@/lib/permissions";
 import { loadParticipation } from "@/lib/participation-data";
+import { getCohorts } from "@/lib/cohorts-data";
+import { cohortName } from "@/lib/cohorts";
 import { statusLine, statusComplete } from "@/lib/status";
 import { REQUIRED_PEER_REPLIES } from "@/lib/participation";
 import { tallyPoll } from "@/lib/polls";
@@ -44,6 +46,57 @@ function summarizeReactions(
   return [...byEmoji.entries()].map(([emoji, v]) => ({ emoji, ...v }));
 }
 
+function isImage(att: Attachment): boolean {
+  return (att.mime_type ?? "").startsWith("image/");
+}
+
+/** Pictures and files attached to a response/reply. */
+function CommentAttachments({ attachments }: { attachments: Attachment[] }) {
+  const images = attachments.filter(isImage);
+  const files = attachments.filter((a) => !isImage(a));
+  return (
+    <div className="mt-2 space-y-2">
+      {images.length > 0 && (
+        <ul className="flex flex-wrap gap-2">
+          {images.map((a) => (
+            <li key={a.id}>
+              <a
+                href={`/api/files/attachments/${a.storage_path}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/api/files/attachments/${a.storage_path}`}
+                  alt={a.filename}
+                  loading="lazy"
+                  className="max-h-48 rounded border border-line object-cover hover:opacity-90 transition-opacity"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      {files.length > 0 && (
+        <ul className="space-y-1 text-sm">
+          {files.map((a) => (
+            <li key={a.id}>
+              📎{" "}
+              <a
+                href={`/api/files/attachments/${a.storage_path}`}
+                className="underline text-accent"
+                download={a.filename}
+              >
+                {a.filename}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function CommentCard({
   comment,
   replies,
@@ -53,6 +106,7 @@ function CommentCard({
   locale,
   postId,
   reactions,
+  attachmentsByComment,
   composerLabels,
   isTeacher,
 }: {
@@ -64,9 +118,11 @@ function CommentCard({
   locale: Locale;
   postId: string;
   reactions: Reaction[];
+  attachmentsByComment: Map<string, Attachment[]>;
   composerLabels: ComposerLabels;
   isTeacher: boolean;
 }) {
+  const commentAttachments = attachmentsByComment.get(comment.id) ?? [];
   const isTopLevel = comment.parent_comment_id === null;
   const hidden = comment.hidden_at !== null;
   const canEdit = canModifyContent(actor, {
@@ -123,6 +179,9 @@ function CommentCard({
             </span>
             <audio controls preload="none" src={`/api/files/audio/${comment.audio_path}`} className="max-w-full" />
           </div>
+        )}
+        {commentAttachments.length > 0 && (
+          <CommentAttachments attachments={commentAttachments} />
         )}
       </div>
 
@@ -182,6 +241,7 @@ function CommentCard({
               locale={locale}
               postId={postId}
               reactions={reactions}
+              attachmentsByComment={attachmentsByComment}
               composerLabels={composerLabels}
               isTeacher={isTeacher}
             />
@@ -260,6 +320,21 @@ export default async function PostPage({
     .or(reactionFilter);
   const reactions = (reactionRows ?? []) as Reaction[];
 
+  // Attachments (pictures/files) on the responses & replies, grouped by comment.
+  const attachmentsByComment = new Map<string, Attachment[]>();
+  if (commentIdList.length > 0) {
+    const { data: commentAttachmentRows } = await supabase
+      .from("attachments")
+      .select("*")
+      .in("comment_id", commentIdList);
+    for (const a of (commentAttachmentRows ?? []) as Attachment[]) {
+      if (!a.comment_id) continue;
+      const list = attachmentsByComment.get(a.comment_id) ?? [];
+      list.push(a);
+      attachmentsByComment.set(a.comment_id, list);
+    }
+  }
+
   const topLevel = comments.filter((c) => c.parent_comment_id === null);
   const repliesByParent = new Map<string, CommentWithAuthor[]>();
   for (const c of comments) {
@@ -272,6 +347,13 @@ export default async function PostPage({
   const isTeacher = profile.role === "teacher";
   const actor: Actor = { id: profile.id, role: profile.role, status: profile.status };
   const hasDeadlines = post.due_at_response || post.due_at_replies;
+
+  // Teacher sees which year group this assignment targets.
+  let cohortLabel: string | null = null;
+  if (isTeacher) {
+    const cohorts = await getCohorts(supabase);
+    cohortLabel = cohortName(cohorts, post.cohort_id, t("cohorts.allGrades"));
+  }
 
   // Optional poll attached to this post.
   const { data: pollRow } = await supabase
@@ -314,6 +396,7 @@ export default async function PostPage({
         id: post.id,
         due_at_response: post.due_at_response,
         due_at_replies: post.due_at_replies,
+        cohort_id: post.cohort_id,
       },
     ]);
     myStatus = byPost.get(post.id)?.get(profile.id) ?? null;
@@ -327,6 +410,8 @@ export default async function PostPage({
     discard: t("comments.discardAudio"),
     attached: t("comments.audioAttached"),
     micDenied: t("comments.micDenied"),
+    addImages: t("comments.addImages"),
+    removeImage: t("comments.removeImage"),
     error: t("common.error"),
   };
 
@@ -340,9 +425,16 @@ export default async function PostPage({
 
       <article className="bg-card border border-line rounded-lg p-4 sm:p-6">
         <header>
-          {post.hidden_at && (
-            <p className="text-xs text-warn mb-2">({t("post.hiddenTag")})</p>
-          )}
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            {cohortLabel && (
+              <span className="text-xs rounded-full bg-paper-deep text-ink-soft px-2 py-0.5">
+                {cohortLabel}
+              </span>
+            )}
+            {post.hidden_at && (
+              <span className="text-xs text-warn">({t("post.hiddenTag")})</span>
+            )}
+          </div>
           <h1 className="font-display text-2xl leading-tight">{post.title}</h1>
           <p className="text-xs text-ink-faint mt-1">
             {post.author?.name} · {formatDateTime(post.created_at, locale)} ·{" "}
@@ -501,6 +593,7 @@ export default async function PostPage({
                 locale={locale}
                 postId={post.id}
                 reactions={reactions}
+                attachmentsByComment={attachmentsByComment}
                 composerLabels={composerLabels}
                 isTeacher={isTeacher}
               />

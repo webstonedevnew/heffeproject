@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireTeacher } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { parseEmailList, INVITE_EXPIRY_DAYS } from "@/lib/invites";
+import { getCohorts, normalizeCohortId } from "@/lib/cohorts-data";
 import { sendEmail, emailLayout } from "@/lib/email";
 import { getT } from "@/lib/i18n";
 import type { Invite } from "@/types/db";
@@ -46,6 +47,10 @@ export async function inviteStudents(formData: FormData) {
   const raw = String(formData.get("emails") ?? "");
   const { valid, invalid } = parseEmailList(raw);
 
+  // Which year group these invitees will join.
+  const cohorts = await getCohorts(admin);
+  const cohortId = normalizeCohortId(cohorts, formData.get("cohortId") as string | null);
+
   // Skip addresses that already have an account or a pending invite.
   const { data: existingProfiles } = await admin
     .from("profiles")
@@ -69,6 +74,7 @@ export async function inviteStudents(formData: FormData) {
       email,
       token,
       invited_by: teacher.id,
+      cohort_id: cohortId,
       expires_at: expiry(),
     });
     if (error) {
@@ -118,6 +124,26 @@ export async function setStudentStatus(
   await admin
     .from("profiles")
     .update({ status })
+    .eq("id", studentId)
+    .eq("role", "student");
+  revalidatePath("/teacher/students");
+}
+
+/**
+ * Move a student to another year group (or clear it). Students can't change
+ * their own cohort — column grants forbid it — so this goes via the service
+ * role after the teacher check.
+ */
+export async function setStudentCohort(formData: FormData) {
+  await requireTeacher();
+  const studentId = String(formData.get("studentId") ?? "");
+  if (!studentId) return;
+  const admin = createAdminClient();
+  const cohorts = await getCohorts(admin);
+  const cohortId = normalizeCohortId(cohorts, formData.get("cohortId") as string | null);
+  await admin
+    .from("profiles")
+    .update({ cohort_id: cohortId })
     .eq("id", studentId)
     .eq("role", "student");
   revalidatePath("/teacher/students");

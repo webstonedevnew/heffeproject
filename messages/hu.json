@@ -37,6 +37,10 @@
     "privacy": "Adatvédelem",
     "teacherTools": "Tanári eszközök"
   },
+  "cohorts": {
+    "allGrades": "Minden évfolyam",
+    "filterLabel": "Szűrés évfolyam szerint"
+  },
   "auth": {
     "signInTitle": "Bejelentkezés",
     "signInIntro": "Add meg az iskolai e-mail-címedet, és küldünk egy bejelentkezési linket. Jelszó nem szükséges.",
@@ -115,7 +119,9 @@
     "submitResponse": "Válasz beküldése",
     "alreadyResponded": "A válaszodat beküldted. Most válaszolj legalább {count} osztálytársadnak.",
     "deleted": "Feladat törölve.",
-    "uploadImage": "Kép beszúrása"
+    "uploadImage": "Kép beszúrása",
+    "cohortLabel": "Évfolyam",
+    "cohortHint": "A feladatot csak ez az évfolyam látja. Válaszd a „Minden évfolyam” lehetőséget, ha mindenkivel meg szeretnéd osztani."
   },
   "comments": {
     "responsesHeading": "Válaszok",
@@ -132,6 +138,8 @@
     "audioAttached": "Hangfelvétel csatolva",
     "audioReply": "Hangos válasz",
     "micDenied": "A mikrofon-hozzáférés le van tiltva. Ellenőrizd a böngésző beállításait.",
+    "addImages": "Képek hozzáadása",
+    "removeImage": "Kép eltávolítása",
     "empty": "Még nincs válasz. Légy az első!"
   },
   "participation": {
@@ -205,6 +213,8 @@
     "title": "Diákok",
     "inviteTitle": "Diákok meghívása",
     "inviteHint": "Illessz be egy vagy több e-mail-címet — vesszővel, szóközzel vagy új sorral elválasztva.",
+    "inviteCohort": "Évfolyam",
+    "cohortLabel": "Évfolyam",
     "sendInvites": "Meghívók küldése",
     "invitesSent": "{count} meghívó elküldve.",
     "invalidSkipped": "Érvénytelen elemek kihagyva: {list}",

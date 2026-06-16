@@ -52,7 +52,12 @@ function slugify(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
-async function ensureUser(email: string, name: string, role: "teacher" | "student") {
+async function ensureUser(
+  email: string,
+  name: string,
+  role: "teacher" | "student",
+  cohortId: string | null = null
+) {
   const { data: created, error } = await admin.auth.admin.createUser({
     email,
     email_confirm: true,
@@ -64,11 +69,35 @@ async function ensureUser(email: string, name: string, role: "teacher" | "studen
     userId = list?.users.find((u) => u.email?.toLowerCase() === email.toLowerCase())?.id ?? null;
   }
   if (!userId) throw new Error(`Could not create or find user ${email}`);
-  const { error: upsertError } = await admin
-    .from("profiles")
-    .upsert({ id: userId, role, name, email: email.toLowerCase(), status: "active" });
+  const { error: upsertError } = await admin.from("profiles").upsert({
+    id: userId,
+    role,
+    name,
+    email: email.toLowerCase(),
+    status: "active",
+    cohort_id: cohortId,
+  });
   if (upsertError) throw upsertError;
   return userId;
+}
+
+const COHORTS = [
+  { key: "g11", name: "Grade 11", position: 11 },
+  { key: "g12", name: "Grade 12", position: 12 },
+];
+
+/** Ensures the cohorts exist and returns a key → id map. */
+async function ensureCohorts(): Promise<Record<string, string>> {
+  for (const c of COHORTS) {
+    const { error } = await admin
+      .from("cohorts")
+      .upsert(c, { onConflict: "key" });
+    if (error) throw error;
+  }
+  const { data } = await admin.from("cohorts").select("id, key");
+  const byKey: Record<string, string> = {};
+  for (const row of data ?? []) byKey[row.key as string] = row.id as string;
+  return byKey;
 }
 
 async function main() {
@@ -91,20 +120,27 @@ async function main() {
   }
   console.log(`✓ ${GROUPS.length} groups`);
 
+  // 3. Cohorts (year groups). Also seeded by migration 0004; idempotent here.
+  const cohorts = await ensureCohorts();
+  console.log(`✓ ${Object.keys(cohorts).length} cohorts`);
+
   if (!withDemo) {
     console.log("Done (set SEED_DEMO_DATA=true for demo content).");
     return;
   }
 
-  // 3. Demo students — fictional names only.
+  // 4. Demo students — fictional names only. Three in grade 11 (so the
+  //    participation demo has responses + replies) and one in grade 12 (so the
+  //    11/12 separation is visible).
   const demoStudents = [
-    { email: "demo.student1@example.com", name: "Demo Student One" },
-    { email: "demo.student2@example.com", name: "Demo Student Two" },
-    { email: "demo.student3@example.com", name: "Demo Student Three" },
+    { email: "demo.student1@example.com", name: "Demo Student One", cohort: "g11" },
+    { email: "demo.student2@example.com", name: "Demo Student Two", cohort: "g11" },
+    { email: "demo.student3@example.com", name: "Demo Student Three", cohort: "g11" },
+    { email: "demo.student4@example.com", name: "Demo Student Four", cohort: "g12" },
   ];
   const studentIds: string[] = [];
   for (const s of demoStudents) {
-    studentIds.push(await ensureUser(s.email, s.name, "student"));
+    studentIds.push(await ensureUser(s.email, s.name, "student", cohorts[s.cohort]));
   }
   console.log(`✓ ${studentIds.length} demo students`);
 
@@ -142,6 +178,7 @@ async function main() {
       .insert({
         group_id: group.id,
         author_id: teacherId,
+        cohort_id: cohorts.g11,
         title: "Week 1 — Do our tools think for us?",
         body_html: bodyHtml,
         body_text: bodyHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
@@ -206,6 +243,55 @@ async function main() {
     console.log("✓ demo assignment, responses and replies");
   } else {
     console.log("✓ demo assignment already present");
+  }
+
+  // 6. A separate grade-12 assignment, so the 11/12 split is visible: the
+  //    grade-11 students above can't see this one, and student four can't see
+  //    the grade-11 thread.
+  const g12Title = "Week 1 (Grade 12) — Whose history counts?";
+  const { data: existingG12 } = await admin
+    .from("posts")
+    .select("id")
+    .eq("title", g12Title)
+    .maybeSingle();
+  if (!existingG12) {
+    const { data: historyGroup } = await admin
+      .from("groups")
+      .select("id")
+      .eq("slug", slugify("History"))
+      .single();
+    if (historyGroup) {
+      const g12BodyHtml =
+        "<p>Read the two contrasting accounts of the same event, then respond:</p>" +
+        "<p><strong>How do we decide which historical account to trust when the sources disagree?</strong></p>";
+      const { data: g12Post } = await admin
+        .from("posts")
+        .insert({
+          group_id: historyGroup.id,
+          author_id: teacherId,
+          cohort_id: cohorts.g12,
+          title: g12Title,
+          body_html: g12BodyHtml,
+          body_text: g12BodyHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+          due_at_response: nextFriday.toISOString(),
+          due_at_replies: nextSunday.toISOString(),
+        })
+        .select("id")
+        .single();
+      if (g12Post) {
+        const html =
+          "<p>Trust should follow the evidence each source can actually back up — provenance matters more than fluency.</p>";
+        await admin.from("comments").insert({
+          post_id: g12Post.id,
+          author_id: studentIds[3],
+          body_html: html,
+          body_text: html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+        });
+        console.log("✓ grade-12 demo assignment");
+      }
+    }
+  } else {
+    console.log("✓ grade-12 demo assignment already present");
   }
 
   console.log("Done. Sign in with a magic link as " + teacherEmail);

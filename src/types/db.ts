@@ -8,6 +8,14 @@ export interface NotificationPrefs {
   email_reminder: boolean;
 }
 
+export interface Cohort {
+  id: string;
+  key: string;
+  name: string;
+  position: number;
+  created_at: string;
+}
+
 export interface Profile {
   id: string;
   role: Role;
@@ -15,6 +23,8 @@ export interface Profile {
   email: string;
   status: UserStatus;
   locale: Locale;
+  /** Year group. null for the teacher, who sees every cohort. */
+  cohort_id: string | null;
   notification_prefs: NotificationPrefs;
   created_at: string;
   updated_at: string;
@@ -25,6 +35,8 @@ export interface Invite {
   email: string;
   token: string;
   invited_by: string;
+  /** Year group the invited student will join. */
+  cohort_id: string | null;
   expires_at: string;
   accepted_at: string | null;
   created_at: string;
@@ -45,6 +57,8 @@ export interface Post {
   id: string;
   group_id: string;
   author_id: string;
+  /** Year group this assignment targets. null = shared with every cohort. */
+  cohort_id: string | null;
   title: string;
   body_html: string;
   body_text: string;

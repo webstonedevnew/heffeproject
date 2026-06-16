@@ -2,12 +2,15 @@ import { requireTeacher } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getT } from "@/lib/i18n";
 import { formatDate } from "@/lib/format";
+import { getCohorts } from "@/lib/cohorts-data";
+import { cohortName } from "@/lib/cohorts";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import {
   inviteStudents,
   resendInvite,
   revokeInvite,
   setStudentStatus,
+  setStudentCohort,
   eraseStudent,
 } from "./actions";
 import type { Invite, Profile } from "@/types/db";
@@ -22,17 +25,19 @@ export default async function StudentsPage({
   const sp = await searchParams;
   const admin = createAdminClient();
 
-  const [{ data: studentRows }, { data: inviteRows }] = await Promise.all([
+  const [{ data: studentRows }, { data: inviteRows }, cohorts] = await Promise.all([
     admin.from("profiles").select("*").eq("role", "student").order("name"),
     admin
       .from("invites")
       .select("*")
       .is("accepted_at", null)
       .order("created_at", { ascending: false }),
+    getCohorts(admin),
   ]);
   const students = (studentRows ?? []) as Profile[];
   const invites = (inviteRows ?? []) as Invite[];
   const now = Date.now();
+  const allGradesLabel = t("cohorts.allGrades");
 
   return (
     <div className="max-w-2xl">
@@ -74,6 +79,25 @@ export default async function StudentsPage({
             placeholder="anna@school.eu, bela@school.eu"
             className="w-full border border-line rounded px-3 py-2 bg-paper text-sm"
           />
+          {cohorts.length > 0 && (
+            <div className="mt-2">
+              <label htmlFor="invite-cohort" className="block text-xs text-ink-soft mb-1">
+                {t("students.inviteCohort")}
+              </label>
+              <select
+                id="invite-cohort"
+                name="cohortId"
+                defaultValue={cohorts[0]?.id ?? ""}
+                className="border border-line rounded px-3 py-2 bg-paper text-sm"
+              >
+                {cohorts.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             type="submit"
             className="mt-2 bg-ink text-paper rounded px-4 py-2 text-sm hover:bg-accent transition-colors"
@@ -97,6 +121,9 @@ export default async function StudentsPage({
                   className="flex flex-wrap items-center gap-2 bg-card border border-line rounded px-3 py-2 text-sm"
                 >
                   <span className="font-medium">{invite.email}</span>
+                  <span className="text-xs rounded-full bg-paper-deep text-ink-soft px-2 py-0.5">
+                    {cohortName(cohorts, invite.cohort_id, allGradesLabel)}
+                  </span>
                   {expired && (
                     <span className="text-xs text-warn uppercase">{t("students.expired")}</span>
                   )}
@@ -153,8 +180,35 @@ export default async function StudentsPage({
                       {s.email} · {t("students.joined", { date: formatDate(s.created_at, profile.locale) })}
                     </p>
                   </div>
+                  {cohorts.length > 0 && (
+                    <form action={setStudentCohort} className="ml-auto flex items-center gap-1">
+                      <input type="hidden" name="studentId" value={s.id} />
+                      <label htmlFor={`cohort-${s.id}`} className="sr-only">
+                        {t("students.cohortLabel")}
+                      </label>
+                      <select
+                        id={`cohort-${s.id}`}
+                        name="cohortId"
+                        defaultValue={s.cohort_id ?? ""}
+                        className="text-xs border border-line rounded px-2 py-1 bg-paper"
+                      >
+                        {cohorts.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                        <option value="">{allGradesLabel}</option>
+                      </select>
+                      <button
+                        type="submit"
+                        className="text-xs underline text-ink-soft hover:text-ink"
+                      >
+                        {t("common.save")}
+                      </button>
+                    </form>
+                  )}
                   <span
-                    className={`ml-auto text-xs rounded-full px-2 py-0.5 ${
+                    className={`${cohorts.length > 0 ? "" : "ml-auto"} text-xs rounded-full px-2 py-0.5 ${
                       s.status === "active"
                         ? "bg-sage-soft text-sage"
                         : "bg-warn-soft text-warn"
