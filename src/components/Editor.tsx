@@ -5,8 +5,9 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { uploadToBucket, fileUrl } from "@/lib/upload-client";
+import { Spinner } from "@/components/Spinner";
 
 interface EditorProps {
   placeholder?: string;
@@ -17,6 +18,8 @@ interface EditorProps {
   /** Show the full toolbar (headings, images) — used for posts. */
   full?: boolean;
   imageButtonLabel?: string;
+  /** Shown while a pasted/dropped/selected image is uploading. */
+  uploadingLabel?: string;
   /** Incremented by the parent to clear the editor after submit. */
   resetSignal?: number;
 }
@@ -58,9 +61,35 @@ export function Editor({
   initialHtml = "",
   full = false,
   imageButtonLabel = "Insert image",
+  uploadingLabel = "Uploading…",
   resetSignal = 0,
 }: EditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const editorRef = useRef<TiptapEditor | null>(null);
+  const inFlight = useRef(0);
+  const [uploading, setUploading] = useState(false);
+
+  /** Upload an image file and drop it in at the cursor. Shared by the toolbar
+   *  button, clipboard paste and drag-and-drop. */
+  const uploadAndInsert = async (file: File) => {
+    const ed = editorRef.current;
+    if (!ed || !file.type.startsWith("image/")) return;
+    inFlight.current += 1;
+    setUploading(true);
+    try {
+      const { path } = await uploadToBucket("attachments", file, file.name);
+      ed.chain().focus().setImage({ src: fileUrl("attachments", path), alt: file.name }).run();
+    } catch (err) {
+      console.error(err);
+      alert("Image upload failed.");
+    } finally {
+      inFlight.current -= 1;
+      if (inFlight.current <= 0) setUploading(false);
+    }
+  };
+
+  const imageFilesFrom = (list: FileList | null | undefined) =>
+    list ? Array.from(list).filter((f) => f.type.startsWith("image/")) : [];
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -73,10 +102,32 @@ export function Editor({
       Placeholder.configure({ placeholder: placeholder ?? "" }),
     ],
     content: initialHtml,
+    editorProps: {
+      // Paste a screenshot or copied image straight into the text.
+      handlePaste(_view, event) {
+        const images = imageFilesFrom(event.clipboardData?.files);
+        if (images.length === 0) return false;
+        event.preventDefault();
+        images.forEach((f) => void uploadAndInsert(f));
+        return true;
+      },
+      // Drag an image file in from the desktop.
+      handleDrop(_view, event) {
+        const images = imageFilesFrom((event as DragEvent).dataTransfer?.files);
+        if (images.length === 0) return false;
+        event.preventDefault();
+        images.forEach((f) => void uploadAndInsert(f));
+        return true;
+      },
+    },
     onUpdate({ editor }) {
       onChange(editor.isEmpty ? "" : editor.getHTML());
     },
   });
+
+  useEffect(() => {
+    editorRef.current = editor;
+  }, [editor]);
 
   useEffect(() => {
     if (resetSignal > 0 && editor) {
@@ -101,19 +152,6 @@ export function Editor({
     editor.chain().focus().setLink({ href: url }).run();
   };
 
-  const insertImage = async (file: File) => {
-    try {
-      const { path } = await uploadToBucket("attachments", file, file.name);
-      editor
-        .chain()
-        .focus()
-        .setImage({ src: fileUrl("attachments", path), alt: file.name })
-        .run();
-    } catch (err) {
-      console.error(err);
-      alert("Image upload failed.");
-    }
-  };
 
   return (
     <div className="border border-line rounded-md bg-card focus-within:border-ink-faint">
@@ -194,14 +232,19 @@ export function Editor({
               ref={fileInputRef}
               type="file"
               accept="image/*"
+              multiple
               className="hidden"
               onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void insertImage(file);
+                imageFilesFrom(e.target.files).forEach((f) => void uploadAndInsert(f));
                 e.target.value = "";
               }}
             />
           </>
+        )}
+        {uploading && (
+          <span className="ml-auto inline-flex items-center gap-1 px-2 text-xs text-ink-faint">
+            <Spinner /> {uploadingLabel}
+          </span>
         )}
       </div>
       <EditorContent editor={editor} className="prose-tok" />

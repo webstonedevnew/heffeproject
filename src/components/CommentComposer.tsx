@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Editor } from "@/components/Editor";
 import { AudioRecorder } from "@/components/AudioRecorder";
+import { Spinner } from "@/components/Spinner";
 import { uploadToBucket } from "@/lib/upload-client";
 import { createComment, type AttachmentInput } from "@/app/(app)/actions";
 
@@ -157,9 +158,10 @@ export function CommentComposer({
           type="button"
           onClick={submit}
           disabled={pending || !hasContent}
-          className="bg-ink text-paper rounded px-4 py-2 text-sm font-medium hover:bg-accent transition-colors disabled:opacity-40"
+          className="inline-flex items-center gap-1.5 bg-ink text-paper rounded px-4 py-2 text-sm font-medium hover:bg-accent transition-colors disabled:opacity-40"
         >
-          {pending ? "…" : labels.submit}
+          {pending && <Spinner />}
+          {labels.submit}
         </button>
       </div>
       {error && (

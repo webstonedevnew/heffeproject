@@ -53,7 +53,7 @@ export default async function GroupPage({
           {t("groups.noPosts")}
         </p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 stagger">
           {cards.map((card) => (
             <PostCard key={card.id} {...card} />
           ))}

@@ -40,11 +40,11 @@ export default async function GroupsPage({
         </Link>
       </div>
 
-      <ul className="grid sm:grid-cols-2 gap-3">
+      <ul className="grid sm:grid-cols-2 gap-3 stagger">
         {groups.map((group) => (
           <li
             key={group.id}
-            className={`bg-card border border-line rounded-lg p-4 ${
+            className={`lift bg-card border border-line rounded-lg p-4 ${
               group.archived_at ? "opacity-60" : ""
             }`}
           >
