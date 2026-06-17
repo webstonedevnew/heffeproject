@@ -91,17 +91,25 @@ h1, h2, h3, .font-display {
    Motion & micro-interactions
    --------------------------------------------------------------------------- */
 
-/* Tactile button press — applies to every <button> and submit input. */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Tactile, snappy button press — applies to every <button> and submit input.
+   Transform is fast (feels instant); colour eases a touch longer (feels smooth). */
 button,
 [type="button"],
-[type="submit"] {
-  transition: transform 120ms ease, background-color 150ms ease,
-    box-shadow 150ms ease, opacity 150ms ease;
+[type="submit"],
+summary,
+a {
+  transition: transform 90ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 160ms ease, color 160ms ease, border-color 160ms ease,
+    box-shadow 160ms ease, opacity 160ms ease;
 }
 button:not(:disabled):active,
 [type="button"]:not(:disabled):active,
 [type="submit"]:not(:disabled):active {
-  transform: translateY(1px) scale(0.97);
+  transform: scale(0.96);
 }
 
 @keyframes fade-in-up {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/i18n";
+import { DecorativeBackground } from "@/components/DecorativeBackground";
 
 export default async function AppLayout({
   children,
@@ -32,7 +33,8 @@ export default async function AppLayout({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-line bg-card/80 backdrop-blur sticky top-0 z-20">
+      <DecorativeBackground />
+      <header className="bg-card/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-between py-3">
             <Link
@@ -67,13 +69,36 @@ export default async function AppLayout({
               </a>
             </div>
           </div>
+
+          {/* Search is always one tap away — a real input, not a buried page. */}
+          <form action="/search" method="get" role="search" className="pb-2">
+            <label htmlFor="nav-search" className="sr-only">{t("nav.search")}</label>
+            <div className="relative">
+              <svg
+                aria-hidden="true"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint"
+                width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input
+                id="nav-search"
+                name="q"
+                type="search"
+                placeholder={t("search.placeholder")}
+                className="w-full rounded-full border border-line bg-paper/70 pl-9 pr-3 py-2 text-sm focus:border-accent focus:bg-card"
+              />
+            </div>
+          </form>
+
           <nav
             aria-label="Main"
             className="flex gap-1 overflow-x-auto pb-2 -mx-1 px-1"
           >
             <Link href="/" className={navLink}>{t("nav.home")}</Link>
             <Link href="/groups" className={navLink}>{t("nav.groups")}</Link>
-            <Link href="/search" className={navLink}>{t("nav.search")}</Link>
             <Link href="/notifications" className={navLink}>
               {t("nav.notifications")}
               {(unread ?? 0) > 0 && (
@@ -86,6 +111,9 @@ export default async function AppLayout({
             {profile.role === "teacher" && (
               <>
                 <span aria-hidden className="self-center text-line">│</span>
+                <Link href="/teacher/dashboard" className={navLink}>
+                  {t("nav.dashboard")}
+                </Link>
                 <Link href="/teacher/participation" className={navLink}>
                   {t("nav.participation")}
                 </Link>
@@ -110,6 +138,8 @@ export default async function AppLayout({
             )}
           </nav>
         </div>
+        {/* soft gradient hairline instead of a flat border */}
+        <div className="h-0.5 w-full bg-gradient-to-r from-accent/40 via-gold/40 to-sage/40" />
       </header>
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-6">{children}</main>

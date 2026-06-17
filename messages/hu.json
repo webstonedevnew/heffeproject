@@ -35,11 +35,28 @@
     "newPost": "Új feladat",
     "signOut": "Kijelentkezés",
     "privacy": "Adatvédelem",
-    "teacherTools": "Tanári eszközök"
+    "teacherTools": "Tanári eszközök",
+    "dashboard": "Áttekintés"
   },
   "cohorts": {
     "allGrades": "Minden évfolyam",
     "filterLabel": "Szűrés évfolyam szerint"
+  },
+  "dashboard": {
+    "title": "Tanári áttekintés",
+    "students": "Aktív diákok",
+    "assignments": "Feladatok",
+    "withDeadlines": "{count} határidővel",
+    "avgCompletion": "Átlagos teljesítés",
+    "completedRatio": "{done}/{total} lépés kész",
+    "openFlags": "Nyitott jelentések",
+    "manageStudents": "Diákok kezelése",
+    "roster": "Diáknévsor",
+    "grade": "Évfolyam",
+    "status": "Állapot",
+    "completion": "Teljesítés",
+    "noStudents": "Még nincsenek diákok — hívd meg őket a Diákok oldalon.",
+    "completionNote": "Teljesítés = azok a feladatok, amelyekre a diák beküldte a válaszát és elég osztálytársnak válaszolt, az évfolyamának határidős feladatai közül."
   },
   "auth": {
     "signInTitle": "Bejelentkezés",

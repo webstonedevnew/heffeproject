@@ -1,5 +1,6 @@
 import { getT } from "@/lib/i18n";
 import type { Locale } from "@/types/db";
+import { DecorativeBackground } from "@/components/DecorativeBackground";
 import { sendMagicLink, passwordSignIn } from "./actions";
 
 export const metadata = { title: "Sign in" };
@@ -21,7 +22,9 @@ export default async function LoginPage({
   const error = params.error ? errorMessages[params.error] ?? t("auth.errorInvalid") : null;
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4">
+    <main className="relative min-h-svh flex items-center justify-center p-4">
+      {/* Still on mobile — no drifting shapes on the sign-in screen. */}
+      <DecorativeBackground animated={false} />
       <div className="w-full max-w-md">
         <header className="text-center mb-8">
           <h1 className="font-display text-4xl tracking-tight">{t("common.appName")}</h1>
