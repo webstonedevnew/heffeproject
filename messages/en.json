@@ -35,11 +35,28 @@
     "newPost": "New assignment",
     "signOut": "Sign out",
     "privacy": "Privacy",
-    "teacherTools": "Teacher tools"
+    "teacherTools": "Teacher tools",
+    "dashboard": "Dashboard"
   },
   "cohorts": {
     "allGrades": "All grades",
     "filterLabel": "Filter by grade"
+  },
+  "dashboard": {
+    "title": "Teacher dashboard",
+    "students": "Active students",
+    "assignments": "Assignments",
+    "withDeadlines": "{count} with deadlines",
+    "avgCompletion": "Avg. completion",
+    "completedRatio": "{done}/{total} steps done",
+    "openFlags": "Open flags",
+    "manageStudents": "Manage students",
+    "roster": "Student roster",
+    "grade": "Grade",
+    "status": "Status",
+    "completion": "Completion",
+    "noStudents": "No students yet — invite them from the Students page.",
+    "completionNote": "Completion = assignments where the student posted their response and replied to enough classmates, across their year group's assignments with deadlines."
   },
   "auth": {
     "signInTitle": "Sign in",
