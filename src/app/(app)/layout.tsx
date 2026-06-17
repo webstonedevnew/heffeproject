@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/i18n";
+import { DecorativeBackground } from "@/components/DecorativeBackground";
 
 export default async function AppLayout({
   children,
@@ -32,7 +33,8 @@ export default async function AppLayout({
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-line bg-card/80 backdrop-blur sticky top-0 z-20">
+      <DecorativeBackground />
+      <header className="bg-card/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-between py-3">
             <Link
@@ -110,6 +112,8 @@ export default async function AppLayout({
             )}
           </nav>
         </div>
+        {/* soft gradient hairline instead of a flat border */}
+        <div className="h-0.5 w-full bg-gradient-to-r from-accent/40 via-gold/40 to-sage/40" />
       </header>
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-6">{children}</main>

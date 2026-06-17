@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { inviteProblem } from "@/lib/invites";
 import { getT } from "@/lib/i18n";
+import { DecorativeBackground } from "@/components/DecorativeBackground";
 import type { Invite, Locale } from "@/types/db";
 import { acceptInvite } from "./actions";
 
@@ -32,7 +33,8 @@ export default async function InvitePage({
     : "unknown";
 
   const shell = (children: React.ReactNode) => (
-    <main className="min-h-screen flex items-center justify-center p-4">
+    <main className="relative min-h-svh flex items-center justify-center p-4">
+      <DecorativeBackground animated={false} />
       <div className="w-full max-w-md">
         <header className="text-center mb-8">
           <h1 className="font-display text-4xl tracking-tight">{t("common.appName")}</h1>
