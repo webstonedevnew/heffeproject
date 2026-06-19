@@ -13,6 +13,7 @@ import { REQUIRED_PEER_REPLIES } from "@/lib/participation";
 import { tallyPoll } from "@/lib/polls";
 import { RichTextView } from "@/components/RichTextView";
 import { Avatar } from "@/components/Avatar";
+import { ScrollToHash } from "@/components/ScrollToHash";
 import { PollSection } from "@/components/PollSection";
 import { ReactionBar, type ReactionSummary } from "@/components/ReactionBar";
 import { CommentComposer, type ComposerLabels } from "@/components/CommentComposer";
@@ -216,7 +217,7 @@ function CommentCard({
             {hidden ? t("common.unhide") : t("common.hide")}
           </ConfirmButton>
         )}
-        {comment.author_id !== profile.id && (
+        {!isTeacher && comment.author_id !== profile.id && (
           <FlagForm
             commentId={comment.id}
             pagePostId={postId}
@@ -425,6 +426,7 @@ export default async function PostPage({
 
   return (
     <div>
+      <ScrollToHash />
       <nav className="text-xs text-ink-faint mb-3">
         <Link href={`/groups/${post.group?.slug}`} className="underline hover:text-ink">
           {post.group?.name}

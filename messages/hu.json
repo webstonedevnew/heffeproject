@@ -267,6 +267,8 @@
     "eraseConfirmLabel": "A megerősítéshez írd be a diák e-mail-címét",
     "eraseConfirm": "Végleges törlés",
     "erased": "A fiók és minden kapcsolódó adat törölve.",
+    "eraseErrorConfirm": "A beírt e-mail nem egyezik a diák e-mail-címével. Semmi sem lett törölve.",
+    "eraseErrorErase": "Nem sikerült törölni a fiókot (a szerver nem tudta törölni a belépést). Ellenőrizd, hogy a SUPABASE_SERVICE_ROLE_KEY a service_role kulcs-e, majd próbáld újra.",
     "noStudents": "Még nincsenek diákok — küldd el az első meghívókat fent."
   },
   "flagsPage": {
