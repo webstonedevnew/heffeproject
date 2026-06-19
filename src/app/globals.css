@@ -95,21 +95,27 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Tactile, snappy button press — applies to every <button> and submit input.
-   Transform is fast (feels instant); colour eases a touch longer (feels smooth). */
+/* Tactile, snappy press feedback — every button, link styled as one, label and
+   summary. Transform is fast (feels instant); colour eases a touch longer. */
 button,
 [type="button"],
 [type="submit"],
+[role="button"],
 summary,
+label,
 a {
-  transition: transform 90ms cubic-bezier(0.34, 1.56, 0.64, 1),
+  transition: transform 110ms cubic-bezier(0.34, 1.6, 0.5, 1),
     background-color 160ms ease, color 160ms ease, border-color 160ms ease,
     box-shadow 160ms ease, opacity 160ms ease;
 }
+/* A clear, deliberate "I was clicked" dip. */
 button:not(:disabled):active,
 [type="button"]:not(:disabled):active,
-[type="submit"]:not(:disabled):active {
-  transform: scale(0.96);
+[type="submit"]:not(:disabled):active,
+[role="button"]:active,
+summary:active,
+a:active {
+  transform: scale(0.92);
 }
 
 @keyframes fade-in-up {

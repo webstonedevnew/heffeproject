@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireTeacher } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getT } from "@/lib/i18n";
@@ -41,6 +42,12 @@ export default async function StudentsPage({
 
   return (
     <div className="max-w-2xl">
+      <Link
+        href="/teacher/dashboard"
+        className="inline-flex items-center gap-1 text-sm text-ink-soft hover:text-ink mb-3"
+      >
+        ← {t("nav.dashboard")}
+      </Link>
       <h1 className="font-display text-2xl mb-4">{t("students.title")}</h1>
 
       {sp.sent && Number(sp.sent) > 0 && (

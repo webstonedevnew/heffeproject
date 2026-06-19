@@ -83,12 +83,6 @@ export default async function ParticipationPage({
                 total: roster.length,
               })}
             </span>
-            <a
-              href={`/teacher/participation/${selected.id}/export`}
-              className="text-sm underline text-accent"
-            >
-              ⬇ {t("participation.exportCsv")}
-            </a>
           </div>
         </div>
 
@@ -162,6 +156,12 @@ export default async function ParticipationPage({
 
   return (
     <div>
+      <Link
+        href="/teacher/dashboard"
+        className="inline-flex items-center gap-1 text-sm text-ink-soft hover:text-ink mb-3"
+      >
+        ← {t("nav.dashboard")}
+      </Link>
       <h1 className="font-display text-2xl mb-1">{t("participation.title")}</h1>
       <p className="text-sm text-ink-soft mb-4">
         {t("participation.intro", { count: REQUIRED_PEER_REPLIES })}
