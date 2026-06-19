@@ -67,7 +67,11 @@ export default async function StudentsPage({
       )}
       {sp.error && (
         <p role="alert" className="mb-3 text-sm bg-accent-soft text-accent rounded px-3 py-2">
-          {t("common.error")}
+          {sp.error === "confirm"
+            ? t("students.eraseErrorConfirm")
+            : sp.error === "erase"
+              ? t("students.eraseErrorErase")
+              : t("common.error")}
         </p>
       )}
 

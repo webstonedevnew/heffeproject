@@ -267,6 +267,8 @@
     "eraseConfirmLabel": "Type the student's email to confirm",
     "eraseConfirm": "Permanently erase",
     "erased": "Account and all associated data erased.",
+    "eraseErrorConfirm": "The email you typed doesn't match this student's email. Nothing was deleted.",
+    "eraseErrorErase": "Couldn't erase the account (the server couldn't delete the login). Check that SUPABASE_SERVICE_ROLE_KEY is the service_role key, then try again.",
     "noStudents": "No students yet — send your first invites above."
   },
   "flagsPage": {

@@ -182,7 +182,8 @@ a:active {
   0%   { box-shadow: 0 0 0 3px var(--color-gold); background-color: var(--color-warn-soft); }
   100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); background-color: transparent; }
 }
-[id^="comment-"]:target {
+[id^="comment-"]:target,
+.comment-flash {
   animation: target-flash 2.4s ease-out;
   border-radius: 0.5rem;
 }
