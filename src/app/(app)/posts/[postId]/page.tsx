@@ -12,6 +12,7 @@ import { statusLine, statusComplete } from "@/lib/status";
 import { REQUIRED_PEER_REPLIES } from "@/lib/participation";
 import { tallyPoll } from "@/lib/polls";
 import { RichTextView } from "@/components/RichTextView";
+import { Avatar } from "@/components/Avatar";
 import { PollSection } from "@/components/PollSection";
 import { ReactionBar, type ReactionSummary } from "@/components/ReactionBar";
 import { CommentComposer, type ComposerLabels } from "@/components/CommentComposer";
@@ -26,7 +27,9 @@ import {
 } from "@/app/(app)/actions";
 import type { Attachment, Comment, Locale, Profile, Reaction } from "@/types/db";
 
-type CommentWithAuthor = Comment & { author: { name: string; role: string } | null };
+type CommentWithAuthor = Comment & {
+  author: { name: string; role: string; avatar_path: string | null } | null;
+};
 
 function summarizeReactions(
   rows: Reaction[],
@@ -140,7 +143,12 @@ function CommentCard({
         hidden ? "opacity-70" : ""
       }`}
     >
-      <header className="flex flex-wrap items-baseline gap-x-2 text-sm">
+      <header className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+        <Avatar
+          name={comment.author?.name ?? "—"}
+          path={comment.author?.avatar_path}
+          size={24}
+        />
         <span className="font-medium">{comment.author?.name ?? "—"}</span>
         {comment.author?.role === "teacher" && (
           <span className="text-xs bg-accent text-paper rounded-full px-1.5 py-0.5">
@@ -276,13 +284,13 @@ export default async function PostPage({
 
   const { data: postRow } = await supabase
     .from("posts")
-    .select("*, group:groups(slug, name), author:profiles!posts_author_id_fkey(name)")
+    .select("*, group:groups(slug, name), author:profiles!posts_author_id_fkey(name, avatar_path)")
     .eq("id", postId)
     .single();
   if (!postRow) notFound();
   const post = postRow as unknown as import("@/types/db").Post & {
     group: { slug: string; name: string } | null;
-    author: { name: string } | null;
+    author: { name: string; avatar_path: string | null } | null;
   };
 
   // Record the view (unique per user), then count.
@@ -300,7 +308,7 @@ export default async function PostPage({
   const [{ data: commentRows }, { data: attachmentRows }] = await Promise.all([
     supabase
       .from("comments")
-      .select("*, author:profiles!comments_author_id_fkey(name, role)")
+      .select("*, author:profiles!comments_author_id_fkey(name, role, avatar_path)")
       .eq("post_id", postId)
       .order("created_at"),
     supabase.from("attachments").select("*").eq("post_id", postId),
@@ -436,9 +444,12 @@ export default async function PostPage({
             )}
           </div>
           <h1 className="font-display text-2xl leading-tight">{post.title}</h1>
-          <p className="text-xs text-ink-faint mt-1">
-            {post.author?.name} · {formatDateTime(post.created_at, locale)} ·{" "}
-            {t("post.views", { count: viewCount ?? 0 })}
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-faint mt-1.5">
+            <Avatar name={post.author?.name ?? "—"} path={post.author?.avatar_path} size={22} />
+            <span>
+              {post.author?.name} · {formatDateTime(post.created_at, locale)} ·{" "}
+              {t("post.views", { count: viewCount ?? 0 })}
+            </span>
           </p>
         </header>
 

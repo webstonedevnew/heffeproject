@@ -27,6 +27,20 @@ export async function updateSettings(formData: FormData) {
   redirect("/settings?saved=1");
 }
 
+export async function updateAvatar(path: string) {
+  const profile = await requireProfile();
+  const supabase = await createClient();
+  await supabase.from("profiles").update({ avatar_path: path }).eq("id", profile.id);
+  revalidatePath("/", "layout");
+}
+
+export async function removeAvatar() {
+  const profile = await requireProfile();
+  const supabase = await createClient();
+  await supabase.from("profiles").update({ avatar_path: null }).eq("id", profile.id);
+  revalidatePath("/", "layout");
+}
+
 export async function setPassword(formData: FormData) {
   await requireProfile();
   const password = String(formData.get("password") ?? "");

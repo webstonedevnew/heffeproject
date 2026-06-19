@@ -56,7 +56,16 @@
     "status": "Állapot",
     "completion": "Teljesítés",
     "noStudents": "Még nincsenek diákok — hívd meg őket a Diákok oldalon.",
-    "completionNote": "Teljesítés = azok a feladatok, amelyekre a diák beküldte a válaszát és elég osztálytársnak válaszolt, az évfolyamának határidős feladatai közül."
+    "completionNote": "Teljesítés = azok a feladatok, amelyekre a diák beküldte a válaszát és elég osztálytársnak válaszolt, az évfolyamának határidős feladatai közül.",
+    "needsAttention": "Figyelmet igényel",
+    "fallingBehind": "Lemaradók",
+    "allGood": "Mindenki képben van — szép.",
+    "noActivity": "Még nincs válasz.",
+    "reviewFlags": "{count} jelentett hozzászólás — átnézés",
+    "activityOn": "itt: „{title}”",
+    "openParticipation": "Részvétel megnyitása",
+    "openFlagsLink": "Jelentések átnézése",
+    "manageStudentsLink": "Diákok és meghívók kezelése"
   },
   "auth": {
     "signInTitle": "Bejelentkezés",
@@ -70,6 +79,7 @@
     "errorDeactivated": "Ezt a fiókot deaktiválták. Kérlek, beszélj a tanároddal.",
     "errorNoAccount": "Ehhez az e-mail-címhez nem tartozik fiók. Kérj meghívót a tanárodtól.",
     "errorInvalid": "Nem sikerült — ellenőrizd az adatokat, és próbáld újra.",
+    "signedOutIdle": "30 perc inaktivitás után kiléptettünk. Jelentkezz be újra a folytatáshoz.",
     "privateNotice": "Ez egy zárt osztálytér. Belépés csak meghívóval."
   },
   "invite": {
@@ -92,6 +102,7 @@
     "latestAssignments": "Legfrissebb feladatok",
     "recentActivity": "Friss aktivitás",
     "noPosts": "Még nincs itt semmi. A tanárod első feladata itt jelenik majd meg.",
+    "noPostsTeacher": "Még nincs feladat. Hozd létre az elsőt a „+ Új feladat” gombbal.",
     "yourStatus": "Állapotod"
   },
   "groups": {
@@ -211,6 +222,10 @@
   },
   "settings": {
     "title": "Beállítások",
+    "avatarTitle": "Profilkép",
+    "avatarHint": "Nem kötelező fénykép vagy kép a neved mellett. A négyzetes képek néznek ki a legjobban.",
+    "avatarChange": "Kép feltöltése",
+    "avatarRemove": "Eltávolítás",
     "nameLabel": "Név",
     "languageLabel": "Nyelv",
     "english": "English",

@@ -1,5 +1,6 @@
 import { requireProfile } from "@/lib/auth";
 import { getT } from "@/lib/i18n";
+import { AvatarUploader } from "@/components/AvatarUploader";
 import { updateSettings, setPassword } from "./actions";
 
 export default async function SettingsPage({
@@ -33,6 +34,20 @@ export default async function SettingsPage({
           {t("common.error")}
         </p>
       )}
+
+      <div className="mb-4">
+        <AvatarUploader
+          name={profile.name}
+          initialPath={profile.avatar_path}
+          labels={{
+            heading: t("settings.avatarTitle"),
+            hint: t("settings.avatarHint"),
+            change: t("settings.avatarChange"),
+            remove: t("settings.avatarRemove"),
+            error: t("common.error"),
+          }}
+        />
+      </div>
 
       <form action={updateSettings} className="bg-card border border-line rounded-lg p-4 space-y-4">
         <div>
