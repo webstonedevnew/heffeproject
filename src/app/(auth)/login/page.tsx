@@ -19,7 +19,10 @@ export default async function LoginPage({
     noaccount: t("auth.errorNoAccount"),
     invalid: t("auth.errorInvalid"),
   };
-  const error = params.error ? errorMessages[params.error] ?? t("auth.errorInvalid") : null;
+  // "idle" is a calm notice, not an error.
+  const idle = params.error === "idle";
+  const error =
+    !idle && params.error ? errorMessages[params.error] ?? t("auth.errorInvalid") : null;
 
   return (
     <main className="relative min-h-svh flex items-center justify-center p-4">
@@ -35,6 +38,11 @@ export default async function LoginPage({
           <h2 className="font-display text-xl mb-1">{t("auth.signInTitle")}</h2>
           <p className="text-sm text-ink-soft mb-4">{t("auth.signInIntro")}</p>
 
+          {idle && (
+            <p role="status" className="mb-4 text-sm bg-paper-deep text-ink-soft rounded px-3 py-2">
+              {t("auth.signedOutIdle")}
+            </p>
+          )}
           {error && (
             <p role="alert" className="mb-4 text-sm bg-accent-soft text-accent rounded px-3 py-2">
               {error}

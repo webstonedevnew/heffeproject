@@ -2,10 +2,12 @@ import Link from "next/link";
 import { requireTeacher } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/i18n";
+import { timeAgo } from "@/lib/format";
 import { loadParticipation } from "@/lib/participation-data";
 import { getCohorts } from "@/lib/cohorts-data";
 import { cohortName } from "@/lib/cohorts";
 import { statusComplete } from "@/lib/status";
+import { Avatar } from "@/components/Avatar";
 
 export const metadata = { title: "Dashboard" };
 
@@ -17,32 +19,47 @@ interface Agg {
 export default async function TeacherDashboardPage() {
   const profile = await requireTeacher();
   const t = getT(profile.locale);
+  const locale = profile.locale;
   const supabase = await createClient();
   const allGrades = t("cohorts.allGrades");
 
-  const [{ data: studentRows }, { data: postRows }, { count: openFlags }, cohorts] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id, name, cohort_id, status")
-        .eq("role", "student")
-        .order("name"),
-      supabase
-        .from("posts")
-        .select("id, title, due_at_response, due_at_replies, cohort_id")
-        .is("hidden_at", null),
-      supabase
-        .from("flags")
-        .select("id", { count: "exact", head: true })
-        .is("resolved_at", null),
-      getCohorts(supabase),
-    ]);
+  const [
+    { data: studentRows },
+    { data: postRows },
+    { count: openFlags },
+    { data: activityRows },
+    cohorts,
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, name, cohort_id, status, avatar_path")
+      .eq("role", "student")
+      .order("name"),
+    supabase
+      .from("posts")
+      .select("id, title, due_at_response, due_at_replies, cohort_id")
+      .is("hidden_at", null),
+    supabase
+      .from("flags")
+      .select("id", { count: "exact", head: true })
+      .is("resolved_at", null),
+    supabase
+      .from("comments")
+      .select(
+        "id, post_id, parent_comment_id, created_at, author:profiles!comments_author_id_fkey(name, avatar_path), post:posts(title)"
+      )
+      .is("hidden_at", null)
+      .order("created_at", { ascending: false })
+      .limit(6),
+    getCohorts(supabase),
+  ]);
 
   const students = (studentRows ?? []) as {
     id: string;
     name: string;
     cohort_id: string | null;
     status: "active" | "deactivated";
+    avatar_path: string | null;
   }[];
   const activeStudents = students.filter((s) => s.status === "active");
   const posts = (postRows ?? []) as {
@@ -54,7 +71,7 @@ export default async function TeacherDashboardPage() {
   }[];
   const deadlinePosts = posts.filter((p) => p.due_at_response || p.due_at_replies);
 
-  // Per-student completion across every assignment in their cohort.
+  // Per-student completion across every deadline assignment in their cohort.
   const { rosterByPost, byPost } = await loadParticipation(supabase, deadlinePosts);
   const perStudent = new Map<string, Agg>();
   let totalApplicable = 0;
@@ -75,16 +92,34 @@ export default async function TeacherDashboardPage() {
       perStudent.set(s.id, agg);
     }
   }
-
   const avgPct =
     totalApplicable > 0 ? Math.round((totalComplete / totalApplicable) * 100) : null;
 
-  // Active students grouped by cohort, for the headline breakdown.
+  const pctFor = (id: string): number | null => {
+    const a = perStudent.get(id);
+    return a && a.applicable > 0 ? Math.round((a.complete / a.applicable) * 100) : null;
+  };
+
+  // "Falling behind" = active students under half-done, lowest first.
+  const fallingBehind = activeStudents
+    .map((s) => ({ s, pct: pctFor(s.id) }))
+    .filter((x) => x.pct !== null && (x.pct as number) < 50)
+    .sort((a, b) => (a.pct as number) - (b.pct as number))
+    .slice(0, 6);
+
   const byCohort = cohorts.map((c) => ({
     name: c.name,
     count: activeStudents.filter((s) => s.cohort_id === c.id).length,
   }));
-  const noCohort = activeStudents.filter((s) => s.cohort_id === null).length;
+
+  const activity = (activityRows ?? []) as unknown as {
+    id: string;
+    post_id: string;
+    parent_comment_id: string | null;
+    created_at: string;
+    author: { name: string; avatar_path: string | null } | null;
+    post: { title: string } | null;
+  }[];
 
   const cards: {
     label: string;
@@ -117,28 +152,30 @@ export default async function TeacherDashboardPage() {
     {
       label: t("dashboard.openFlags"),
       value: String(openFlags ?? 0),
-      sub: undefined,
       href: "/teacher/flags",
       warn: (openFlags ?? 0) > 0,
     },
   ];
 
+  const action =
+    "rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors";
+
   return (
     <div className="animate-fade-in-up">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
         <h1 className="font-display text-2xl">{t("dashboard.title")}</h1>
-        <div className="flex flex-wrap gap-2 text-sm">
-          <Link
-            href="/teacher/new-post"
-            className="bg-ink text-paper rounded-full px-3 py-1.5 hover:bg-accent transition-colors"
-          >
+        <div className="flex flex-wrap gap-2">
+          <Link href="/teacher/new-post" className={`${action} bg-ink text-paper hover:bg-accent`}>
             + {t("nav.newPost")}
           </Link>
-          <Link
-            href="/teacher/students"
-            className="border border-line rounded-full px-3 py-1.5 hover:bg-paper-deep"
-          >
-            {t("dashboard.manageStudents")}
+          <Link href="/teacher/students" className={`${action} border border-line hover:bg-paper-deep`}>
+            {t("students.inviteTitle")}
+          </Link>
+          <Link href="/teacher/participation" className={`${action} border border-line hover:bg-paper-deep`}>
+            {t("dashboard.openParticipation")}
+          </Link>
+          <Link href="/teacher/flags" className={`${action} border border-line hover:bg-paper-deep`}>
+            {t("dashboard.openFlagsLink")}
           </Link>
         </div>
       </div>
@@ -146,17 +183,9 @@ export default async function TeacherDashboardPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger">
         {cards.map((c) => (
-          <Link
-            key={c.label}
-            href={c.href}
-            className="lift block bg-card border border-line rounded-lg p-4"
-          >
+          <Link key={c.label} href={c.href} className="lift block bg-card border border-line rounded-lg p-4">
             <p className="text-xs uppercase tracking-wide text-ink-faint">{c.label}</p>
-            <p
-              className={`font-display text-3xl mt-1 ${
-                c.warn ? "text-warn" : "text-ink"
-              }`}
-            >
+            <p className={`font-display text-3xl mt-1 ${c.warn ? "text-warn" : "text-ink"}`}>
               {c.value}
             </p>
             {c.sub && <p className="text-xs text-ink-soft mt-1 leading-snug">{c.sub}</p>}
@@ -164,9 +193,83 @@ export default async function TeacherDashboardPage() {
         ))}
       </div>
 
+      <div className="grid lg:grid-cols-2 gap-4 mt-4">
+        {/* Needs attention */}
+        <section className="bg-card border border-line rounded-lg p-4">
+          <h2 className="font-display text-lg mb-3">{t("dashboard.needsAttention")}</h2>
+          {(openFlags ?? 0) > 0 && (
+            <Link
+              href="/teacher/flags"
+              className="flex items-center gap-2 text-sm bg-warn-soft text-warn rounded px-3 py-2 mb-3 hover:opacity-90"
+            >
+              🚩 {t("dashboard.reviewFlags", { count: openFlags ?? 0 })}
+            </Link>
+          )}
+          {fallingBehind.length === 0 ? (
+            <p className="text-sm text-ink-soft">{t("dashboard.allGood")}</p>
+          ) : (
+            <>
+              <p className="text-xs uppercase tracking-wide text-ink-faint mb-2">
+                {t("dashboard.fallingBehind")}
+              </p>
+              <ul className="space-y-1.5">
+                {fallingBehind.map(({ s, pct }) => (
+                  <li key={s.id} className="flex items-center gap-2 text-sm">
+                    <Avatar name={s.name} path={s.avatar_path} size={24} />
+                    <span className="font-medium">{s.name}</span>
+                    <span className="text-ink-faint text-xs">
+                      {cohortName(cohorts, s.cohort_id, allGrades)}
+                    </span>
+                    <span className="ml-auto text-xs font-medium text-accent tabular-nums">
+                      {pct}%
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </section>
+
+        {/* Recent activity */}
+        <section className="bg-card border border-line rounded-lg p-4">
+          <h2 className="font-display text-lg mb-3">{t("home.recentActivity")}</h2>
+          {activity.length === 0 ? (
+            <p className="text-sm text-ink-soft">{t("dashboard.noActivity")}</p>
+          ) : (
+            <ul className="space-y-2.5">
+              {activity.map((a) => (
+                <li key={a.id} className="flex items-center gap-2 text-sm">
+                  <Avatar name={a.author?.name ?? "—"} path={a.author?.avatar_path} size={24} />
+                  <Link
+                    href={`/posts/${a.post_id}#comment-${a.id}`}
+                    className="min-w-0 flex-1 hover:text-accent"
+                  >
+                    <span className="font-medium">{a.author?.name ?? "—"}</span>{" "}
+                    <span className="text-ink-soft">
+                      {t("dashboard.activityOn", { title: a.post?.title ?? "" })}
+                    </span>
+                  </Link>
+                  <time
+                    dateTime={a.created_at}
+                    className="text-xs text-ink-faint whitespace-nowrap shrink-0"
+                  >
+                    {timeAgo(a.created_at, locale)}
+                  </time>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+
       {/* Student roster */}
-      <section className="mt-7">
-        <h2 className="font-display text-xl mb-3">{t("dashboard.roster")}</h2>
+      <section className="mt-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display text-xl">{t("dashboard.roster")}</h2>
+          <Link href="/teacher/students" className="text-sm underline text-ink-soft hover:text-ink">
+            {t("dashboard.manageStudentsLink")}
+          </Link>
+        </div>
         {activeStudents.length === 0 ? (
           <p className="text-ink-soft bg-card border border-line rounded-lg p-6 text-center">
             {t("dashboard.noStudents")}
@@ -194,25 +297,24 @@ export default async function TeacherDashboardPage() {
                     return (
                       <tr
                         key={s.id}
-                        className={`border-b border-line/60 last:border-0 ${
-                          deactivated ? "opacity-50" : ""
-                        }`}
+                        className={`border-b border-line/60 last:border-0 ${deactivated ? "opacity-50" : ""}`}
                       >
-                        <td className="px-4 py-2.5 font-medium whitespace-nowrap">{s.name}</td>
+                        <td className="px-4 py-2.5 font-medium whitespace-nowrap">
+                          <span className="flex items-center gap-2">
+                            <Avatar name={s.name} path={s.avatar_path} size={26} />
+                            {s.name}
+                          </span>
+                        </td>
                         <td className="px-4 py-2.5 whitespace-nowrap text-ink-soft">
                           {cohortName(cohorts, s.cohort_id, allGrades)}
                         </td>
                         <td className="px-4 py-2.5">
                           <span
                             className={`text-xs rounded-full px-2 py-0.5 ${
-                              deactivated
-                                ? "bg-warn-soft text-warn"
-                                : "bg-sage-soft text-sage"
+                              deactivated ? "bg-warn-soft text-warn" : "bg-sage-soft text-sage"
                             }`}
                           >
-                            {deactivated
-                              ? t("students.statusDeactivated")
-                              : t("students.statusActive")}
+                            {deactivated ? t("students.statusDeactivated") : t("students.statusActive")}
                           </span>
                         </td>
                         <td className="px-4 py-2.5">

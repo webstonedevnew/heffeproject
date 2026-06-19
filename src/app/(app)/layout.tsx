@@ -3,6 +3,8 @@ import { requireProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/i18n";
 import { DecorativeBackground } from "@/components/DecorativeBackground";
+import { IdleTimeout } from "@/components/IdleTimeout";
+import { Avatar } from "@/components/Avatar";
 
 export default async function AppLayout({
   children,
@@ -34,6 +36,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <DecorativeBackground />
+      <IdleTimeout />
       <header className="bg-card/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-between py-3">
@@ -58,6 +61,9 @@ export default async function AppLayout({
               {t("common.appName")}
             </Link>
             <div className="flex items-center gap-2 text-sm">
+              <Link href="/settings" aria-label={profile.name}>
+                <Avatar name={profile.name} path={profile.avatar_path} size={28} />
+              </Link>
               <span className="hidden sm:inline text-ink-soft">{profile.name}</span>
               {profile.role === "teacher" && (
                 <span className="text-xs bg-accent text-paper rounded-full px-2 py-0.5">
@@ -111,17 +117,9 @@ export default async function AppLayout({
             {profile.role === "teacher" && (
               <>
                 <span aria-hidden className="self-center text-line">│</span>
+                {/* Teacher tools all live in the dashboard now. */}
                 <Link href="/teacher/dashboard" className={navLink}>
                   {t("nav.dashboard")}
-                </Link>
-                <Link href="/teacher/participation" className={navLink}>
-                  {t("nav.participation")}
-                </Link>
-                <Link href="/teacher/students" className={navLink}>
-                  {t("nav.students")}
-                </Link>
-                <Link href="/teacher/flags" className={navLink}>
-                  {t("nav.flags")}
                   {openFlags > 0 && (
                     <span className="ml-1 inline-flex items-center justify-center min-w-5 h-5 text-xs bg-warn text-paper rounded-full px-1">
                       {openFlags}

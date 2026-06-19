@@ -8,6 +8,7 @@ import { getCohorts } from "@/lib/cohorts-data";
 import { cohortName } from "@/lib/cohorts";
 import { statusComplete } from "@/lib/status";
 import { REQUIRED_PEER_REPLIES } from "@/lib/participation";
+import { AutoSubmitSelect } from "@/components/AutoSubmitSelect";
 
 export default async function ParticipationPage({
   searchParams,
@@ -176,7 +177,7 @@ export default async function ParticipationPage({
             <label htmlFor="post-select" className="sr-only">
               {t("participation.selectGroup")}
             </label>
-            <select
+            <AutoSubmitSelect
               id="post-select"
               name="post"
               defaultValue={selected?.id}
@@ -189,13 +190,16 @@ export default async function ParticipationPage({
                   {p.title}
                 </option>
               ))}
-            </select>
-            <button
-              type="submit"
-              className="ml-2 border border-line rounded px-3 py-2 text-sm hover:bg-paper-deep"
-            >
-              →
-            </button>
+            </AutoSubmitSelect>
+            {/* No-JS fallback: still works without the auto-submit. */}
+            <noscript>
+              <button
+                type="submit"
+                className="ml-2 border border-line rounded px-3 py-2 text-sm hover:bg-paper-deep"
+              >
+                →
+              </button>
+            </noscript>
           </form>
           {table}
         </>

@@ -25,6 +25,8 @@ export interface Profile {
   locale: Locale;
   /** Year group. null for the teacher, who sees every cohort. */
   cohort_id: string | null;
+  /** Storage path of the profile picture in the attachments bucket, or null. */
+  avatar_path: string | null;
   notification_prefs: NotificationPrefs;
   created_at: string;
   updated_at: string;

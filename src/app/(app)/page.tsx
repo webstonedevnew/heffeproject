@@ -65,7 +65,7 @@ export default async function HomePage({
       </div>
       {cards.length === 0 ? (
         <p className="text-ink-soft bg-card border border-line rounded-lg p-6 text-center">
-          {t("home.noPosts")}
+          {isTeacher ? t("home.noPostsTeacher") : t("home.noPosts")}
         </p>
       ) : (
         <div className="space-y-3 stagger">

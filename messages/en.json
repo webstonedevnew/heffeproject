@@ -56,7 +56,16 @@
     "status": "Status",
     "completion": "Completion",
     "noStudents": "No students yet — invite them from the Students page.",
-    "completionNote": "Completion = assignments where the student posted their response and replied to enough classmates, across their year group's assignments with deadlines."
+    "completionNote": "Completion = assignments where the student posted their response and replied to enough classmates, across their year group's assignments with deadlines.",
+    "needsAttention": "Needs attention",
+    "fallingBehind": "Falling behind",
+    "allGood": "Everyone's on track — nice.",
+    "noActivity": "No responses yet.",
+    "reviewFlags": "{count} flagged contribution(s) — review",
+    "activityOn": "on “{title}”",
+    "openParticipation": "Open participation",
+    "openFlagsLink": "Review flags",
+    "manageStudentsLink": "Manage students & invites"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -70,6 +79,7 @@
     "errorDeactivated": "This account has been deactivated. Please talk to your teacher.",
     "errorNoAccount": "No account found for this email. Ask your teacher for an invite.",
     "errorInvalid": "That didn't work — please check your details and try again.",
+    "signedOutIdle": "You were signed out after 30 minutes of inactivity. Sign in again to continue.",
     "privateNotice": "This is a private classroom space. Access by invitation only."
   },
   "invite": {
@@ -92,6 +102,7 @@
     "latestAssignments": "Latest assignments",
     "recentActivity": "Recent activity",
     "noPosts": "Nothing here yet. Your teacher's first assignment will appear here.",
+    "noPostsTeacher": "No assignments yet. Create your first one with “+ New assignment”.",
     "yourStatus": "Your status"
   },
   "groups": {
@@ -211,6 +222,10 @@
   },
   "settings": {
     "title": "Settings",
+    "avatarTitle": "Profile picture",
+    "avatarHint": "An optional photo or image shown next to your name. Square images look best.",
+    "avatarChange": "Upload image",
+    "avatarRemove": "Remove",
     "nameLabel": "Name",
     "languageLabel": "Language",
     "english": "English",
