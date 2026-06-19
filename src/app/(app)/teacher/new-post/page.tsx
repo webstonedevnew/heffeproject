@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireTeacher } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/i18n";
@@ -20,6 +21,12 @@ export default async function NewPostPage() {
 
   return (
     <div className="max-w-2xl">
+      <Link
+        href="/teacher/dashboard"
+        className="inline-flex items-center gap-1 text-sm text-ink-soft hover:text-ink mb-3"
+      >
+        ← {t("nav.dashboard")}
+      </Link>
       <h1 className="font-display text-2xl mb-4">{t("post.newAssignment")}</h1>
       <PostForm
         groups={groups ?? []}

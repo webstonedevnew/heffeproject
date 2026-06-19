@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { inviteProblem } from "@/lib/invites";
 import { getT } from "@/lib/i18n";
 import { DecorativeBackground } from "@/components/DecorativeBackground";
+import { SubmitButton } from "@/components/SubmitButton";
 import type { Invite, Locale } from "@/types/db";
 import { acceptInvite } from "./actions";
 
@@ -132,12 +133,9 @@ export default async function InvitePage({
             {t("invite.passwordHint")}
           </p>
         </div>
-        <button
-          type="submit"
-          className="w-full bg-ink text-paper rounded px-4 py-2.5 font-medium hover:bg-accent transition-colors"
-        >
+        <SubmitButton className="w-full bg-ink text-paper rounded px-4 py-2.5 font-medium hover:bg-accent">
           {t("invite.join")}
-        </button>
+        </SubmitButton>
       </form>
     </>
   );

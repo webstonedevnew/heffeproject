@@ -169,7 +169,7 @@ export default async function TeacherDashboardPage() {
             + {t("nav.newPost")}
           </Link>
           <Link href="/teacher/students" className={`${action} border border-line hover:bg-paper-deep`}>
-            {t("students.inviteTitle")}
+            {t("dashboard.manageStudentsLink")}
           </Link>
           <Link href="/teacher/participation" className={`${action} border border-line hover:bg-paper-deep`}>
             {t("dashboard.openParticipation")}
@@ -264,12 +264,7 @@ export default async function TeacherDashboardPage() {
 
       {/* Student roster */}
       <section className="mt-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display text-xl">{t("dashboard.roster")}</h2>
-          <Link href="/teacher/students" className="text-sm underline text-ink-soft hover:text-ink">
-            {t("dashboard.manageStudentsLink")}
-          </Link>
-        </div>
+        <h2 className="font-display text-xl mb-3">{t("dashboard.roster")}</h2>
         {activeStudents.length === 0 ? (
           <p className="text-ink-soft bg-card border border-line rounded-lg p-6 text-center">
             {t("dashboard.noStudents")}

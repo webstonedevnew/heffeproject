@@ -1,6 +1,7 @@
 import { getT } from "@/lib/i18n";
 import type { Locale } from "@/types/db";
 import { DecorativeBackground } from "@/components/DecorativeBackground";
+import { SubmitButton } from "@/components/SubmitButton";
 import { sendMagicLink, passwordSignIn } from "./actions";
 
 export const metadata = { title: "Sign in" };
@@ -68,12 +69,9 @@ export default async function LoginPage({
                 className="w-full border border-line rounded px-3 py-2 bg-paper focus:border-accent"
               />
             </div>
-            <button
-              type="submit"
-              className="w-full bg-ink text-paper rounded px-4 py-2.5 font-medium hover:bg-accent transition-colors"
-            >
+            <SubmitButton className="w-full bg-ink text-paper rounded px-4 py-2.5 font-medium hover:bg-accent">
               {t("auth.sendMagicLink")}
-            </button>
+            </SubmitButton>
           </form>
 
           <details className="mt-5" open={params.mode === "password"}>
@@ -107,12 +105,9 @@ export default async function LoginPage({
                   className="w-full border border-line rounded px-3 py-2 bg-paper"
                 />
               </div>
-              <button
-                type="submit"
-                className="w-full border border-ink rounded px-4 py-2 font-medium hover:bg-paper-deep"
-              >
+              <SubmitButton className="w-full border border-ink rounded px-4 py-2 font-medium hover:bg-paper-deep">
                 {t("auth.signInWithPassword")}
-              </button>
+              </SubmitButton>
             </form>
           </details>
         </div>

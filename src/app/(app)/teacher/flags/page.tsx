@@ -48,6 +48,12 @@ export default async function FlagsPage({
 
   return (
     <div className="max-w-2xl">
+      <Link
+        href="/teacher/dashboard"
+        className="inline-flex items-center gap-1 text-sm text-ink-soft hover:text-ink mb-3"
+      >
+        ← {t("nav.dashboard")}
+      </Link>
       <div className="flex items-center justify-between mb-4">
         <h1 className="font-display text-2xl">{t("flagsPage.title")}</h1>
         <Link
@@ -70,53 +76,72 @@ export default async function FlagsPage({
             return (
               <li
                 key={flag.id}
-                className={`bg-card border border-line rounded-lg p-4 ${
-                  flag.resolved_at ? "opacity-60" : ""
+                className={`bg-card rounded-lg p-4 border ${
+                  flag.resolved_at
+                    ? "border-line opacity-60"
+                    : "border-warn/50 border-l-4 border-l-warn shadow-sm"
                 }`}
               >
-                <p className="text-xs text-ink-faint">
-                  {t("flagsPage.flaggedBy", {
-                    name: flag.flagger?.name ?? "—",
-                    date: formatDateTime(flag.created_at, profile.locale),
-                  })}
+                <div className="flex items-center gap-2">
+                  <span aria-hidden className="text-lg leading-none">🚩</span>
+                  <p className="text-xs text-ink-faint">
+                    {t("flagsPage.flaggedBy", {
+                      name: flag.flagger?.name ?? "—",
+                      date: formatDateTime(flag.created_at, profile.locale),
+                    })}
+                  </p>
                   {flag.resolved_at && (
-                    <span className="ml-2 uppercase text-sage">
-                      {t("flagsPage.resolvedTag")}
+                    <span className="ml-auto text-xs uppercase tracking-wide text-sage font-medium">
+                      ✓ {t("flagsPage.resolvedTag")}
                     </span>
                   )}
-                </p>
-                <p className="text-sm mt-1">
+                </div>
+
+                {/* The student's reason — the most important thing here. */}
+                <div className="mt-3 rounded-r border-l-4 border-warn bg-warn-soft px-3 py-2">
+                  <p className="text-[11px] uppercase tracking-wide text-warn font-semibold">
+                    {t("flagsPage.reason")}
+                  </p>
+                  <p className="text-sm mt-0.5 text-ink">
+                    {flag.reason ? (
+                      `“${flag.reason}”`
+                    ) : (
+                      <em className="text-ink-faint">{t("flagsPage.noReason")}</em>
+                    )}
+                  </p>
+                </div>
+
+                {/* What was flagged. */}
+                <div className="mt-2 rounded border border-line bg-paper-deep/40 px-3 py-2">
+                  <p className="text-[11px] uppercase tracking-wide text-ink-faint">
+                    {t("flagsPage.flaggedContent")}
+                  </p>
                   {flag.comment ? (
-                    <>
+                    <p className="text-sm mt-0.5">
                       <span className="font-medium">{flag.comment.author?.name}:</span>{" "}
                       <span className="text-ink-soft">
-                        {flag.comment.body_text.slice(0, 160) || "🎙"}
+                        {flag.comment.body_text.slice(0, 200) || "🎙"}
                       </span>
-                    </>
+                    </p>
                   ) : (
-                    <span className="font-medium">{flag.post?.title}</span>
+                    <p className="text-sm mt-0.5 font-medium">{flag.post?.title}</p>
                   )}
-                </p>
-                <p className="text-sm mt-1">
-                  <span className="text-xs uppercase tracking-wide text-ink-faint">
-                    {t("flagsPage.reason")}:
-                  </span>{" "}
-                  {flag.reason || <em className="text-ink-faint">{t("flagsPage.noReason")}</em>}
-                </p>
-                <div className="flex gap-4 mt-2 text-xs">
+                </div>
+
+                <div className="flex flex-wrap gap-4 mt-3 text-sm">
                   {targetPostId && (
                     <Link
                       href={`/posts/${targetPostId}${anchor}`}
-                      className="underline text-accent"
+                      className="underline text-accent font-medium"
                     >
-                      {t("flagsPage.openContent")}
+                      {t("flagsPage.openContent")} →
                     </Link>
                   )}
                   {!flag.resolved_at && (
                     <ConfirmButton
                       action={resolveFlag.bind(null, flag.id)}
                       confirmText={t("flagsPage.resolve") + "?"}
-                      className="underline text-ink-soft text-xs"
+                      className="underline text-ink-soft"
                     >
                       {t("flagsPage.resolve")}
                     </ConfirmButton>
