@@ -200,9 +200,10 @@ export default async function TeacherDashboardPage() {
           {(openFlags ?? 0) > 0 && (
             <Link
               href="/teacher/flags"
-              className="flex items-center gap-2 text-sm bg-warn-soft text-warn rounded px-3 py-2 mb-3 hover:opacity-90"
+              className="attention-pulse flex items-center gap-2 text-sm font-medium bg-warn-soft text-warn rounded px-3 py-2 mb-3 hover:opacity-90"
             >
-              🚩 {t("dashboard.reviewFlags", { count: openFlags ?? 0 })}
+              <span className="animate-pulse">🚩</span>
+              {t("dashboard.reviewFlags", { count: openFlags ?? 0 })} →
             </Link>
           )}
           {fallingBehind.length === 0 ? (

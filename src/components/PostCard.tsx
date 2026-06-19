@@ -31,7 +31,7 @@ export function PostCard(props: PostCardProps) {
   const hasDeadlines = props.dueAtResponse || props.dueAtReplies;
 
   return (
-    <article className="lift bg-card border border-line rounded-lg p-4 sm:p-5 hover:border-ink-faint">
+    <article className="lift relative bg-card border border-line rounded-lg p-4 sm:p-5 hover:border-ink-faint">
       <div className="flex items-center gap-2 text-xs text-ink-faint uppercase tracking-wide">
         <span>{props.groupName}</span>
         {props.cohortLabel && (
@@ -45,7 +45,10 @@ export function PostCard(props: PostCardProps) {
         )}
       </div>
       <h3 className="font-display text-lg mt-1 leading-snug">
-        <Link href={`/posts/${props.id}`} className="hover:text-accent">
+        <Link
+          href={`/posts/${props.id}`}
+          className="hover:text-accent after:absolute after:inset-0 after:content-['']"
+        >
           {props.title}
         </Link>
       </h3>

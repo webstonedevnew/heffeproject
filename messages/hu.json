@@ -127,6 +127,8 @@
     "groupLabel": "Csoport",
     "dueResponseLabel": "Saját válasz határideje",
     "dueRepliesLabel": "Társaknak adott válaszok határideje",
+    "dateLabel": "Dátum",
+    "timeLabel": "Idő",
     "dueHint": "Hagyd üresen a határidő nélküli bejegyzéseknél (pl. Kávésarok).",
     "attachmentsLabel": "Mellékletek",
     "publish": "Közzététel",

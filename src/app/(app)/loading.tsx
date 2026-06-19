@@ -8,19 +8,14 @@ import { Spinner } from "@/components/Spinner";
  */
 export default function Loading() {
   return (
-    <>
-      <div className="fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden">
-        <div className="loading-bar h-full w-full origin-left bg-accent" />
-      </div>
-      <div
-        className="flex justify-center pt-24 text-ink-faint opacity-0"
-        style={{ animation: "fade-in 0.3s ease 0.25s forwards" }}
-        aria-busy="true"
-        aria-live="polite"
-      >
-        <span className="sr-only">Loading…</span>
-        <Spinner className="text-xl" />
-      </div>
-    </>
+    <div
+      className="flex justify-center pt-24 text-ink-faint opacity-0"
+      style={{ animation: "fade-in 0.3s ease 0.2s forwards" }}
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <span className="sr-only">Loading…</span>
+      <Spinner className="text-2xl" />
+    </div>
   );
 }

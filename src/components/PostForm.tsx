@@ -16,6 +16,8 @@ export interface PostFormLabels {
   allGrades: string;
   dueResponse: string;
   dueReplies: string;
+  dateLabel: string;
+  timeLabel: string;
   dueHint: string;
   attachments: string;
   submit: string;
@@ -26,15 +28,24 @@ export interface PostFormLabels {
   pollHint: string;
 }
 
-function isoToLocalInput(iso: string | null): string {
-  if (!iso) return "";
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** Split an ISO timestamp into separate <input type=date> + <input type=time>
+ *  values. Two native inputs work on Safari where datetime-local doesn't. */
+function isoToParts(iso: string | null): { date: string; time: string } {
+  if (!iso) return { date: "", time: "" };
   const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return {
+    date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+  };
 }
 
-function localInputToIso(value: string): string | null {
-  return value ? new Date(value).toISOString() : null;
+/** Combine a date + time back into an ISO string. Empty date = no deadline;
+ *  a date with no time defaults to end-of-day so it's never "already due". */
+function partsToIso(date: string, time: string): string | null {
+  if (!date) return null;
+  return new Date(`${date}T${time || "23:59"}`).toISOString();
 }
 
 export function PostForm({
@@ -63,8 +74,12 @@ export function PostForm({
   // unless the teacher deliberately chooses to share it with everyone.
   const [cohortId, setCohortId] = useState(cohorts[0]?.id ?? "");
   const [bodyHtml, setBodyHtml] = useState(initial?.bodyHtml ?? "");
-  const [dueResponse, setDueResponse] = useState(isoToLocalInput(initial?.dueAtResponse ?? null));
-  const [dueReplies, setDueReplies] = useState(isoToLocalInput(initial?.dueAtReplies ?? null));
+  const initialResponse = isoToParts(initial?.dueAtResponse ?? null);
+  const initialReplies = isoToParts(initial?.dueAtReplies ?? null);
+  const [responseDate, setResponseDate] = useState(initialResponse.date);
+  const [responseTime, setResponseTime] = useState(initialResponse.time);
+  const [repliesDate, setRepliesDate] = useState(initialReplies.date);
+  const [repliesTime, setRepliesTime] = useState(initialReplies.time);
   const [files, setFiles] = useState<File[]>([]);
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptionsRaw, setPollOptionsRaw] = useState("");
@@ -81,8 +96,8 @@ export function PostForm({
             postId,
             title,
             bodyHtml,
-            dueAtResponse: localInputToIso(dueResponse),
-            dueAtReplies: localInputToIso(dueReplies),
+            dueAtResponse: partsToIso(responseDate, responseTime),
+            dueAtReplies: partsToIso(repliesDate, repliesTime),
           });
         } else {
           const attachments: AttachmentInput[] = [];
@@ -96,8 +111,8 @@ export function PostForm({
             groupId,
             cohortId: cohortId || null,
             bodyHtml,
-            dueAtResponse: localInputToIso(dueResponse),
-            dueAtReplies: localInputToIso(dueReplies),
+            dueAtResponse: partsToIso(responseDate, responseTime),
+            dueAtReplies: partsToIso(repliesDate, repliesTime),
             attachments,
             poll:
               pollQuestion.trim() && pollOptions.length >= 2
@@ -186,28 +201,48 @@ export function PostForm({
 
       <fieldset className="grid sm:grid-cols-2 gap-3">
         <div>
-          <label htmlFor="due-response" className="block text-sm font-medium mb-1">
+          <label htmlFor="due-response-date" className="block text-sm font-medium mb-1">
             {labels.dueResponse}
           </label>
-          <input
-            id="due-response"
-            type="datetime-local"
-            value={dueResponse}
-            onChange={(e) => setDueResponse(e.target.value)}
-            className="w-full border border-line rounded px-3 py-2 bg-paper"
-          />
+          <div className="flex gap-2">
+            <input
+              id="due-response-date"
+              type="date"
+              value={responseDate}
+              onChange={(e) => setResponseDate(e.target.value)}
+              aria-label={`${labels.dueResponse} — ${labels.dateLabel}`}
+              className="flex-1 min-w-0 border border-line rounded px-3 py-2 bg-paper"
+            />
+            <input
+              type="time"
+              value={responseTime}
+              onChange={(e) => setResponseTime(e.target.value)}
+              aria-label={`${labels.dueResponse} — ${labels.timeLabel}`}
+              className="w-28 border border-line rounded px-3 py-2 bg-paper"
+            />
+          </div>
         </div>
         <div>
-          <label htmlFor="due-replies" className="block text-sm font-medium mb-1">
+          <label htmlFor="due-replies-date" className="block text-sm font-medium mb-1">
             {labels.dueReplies}
           </label>
-          <input
-            id="due-replies"
-            type="datetime-local"
-            value={dueReplies}
-            onChange={(e) => setDueReplies(e.target.value)}
-            className="w-full border border-line rounded px-3 py-2 bg-paper"
-          />
+          <div className="flex gap-2">
+            <input
+              id="due-replies-date"
+              type="date"
+              value={repliesDate}
+              onChange={(e) => setRepliesDate(e.target.value)}
+              aria-label={`${labels.dueReplies} — ${labels.dateLabel}`}
+              className="flex-1 min-w-0 border border-line rounded px-3 py-2 bg-paper"
+            />
+            <input
+              type="time"
+              value={repliesTime}
+              onChange={(e) => setRepliesTime(e.target.value)}
+              aria-label={`${labels.dueReplies} — ${labels.timeLabel}`}
+              className="w-28 border border-line rounded px-3 py-2 bg-paper"
+            />
+          </div>
         </div>
         <p className="text-xs text-ink-faint sm:col-span-2">{labels.dueHint}</p>
       </fieldset>
