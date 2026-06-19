@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getT } from "@/lib/i18n";
 import { DecorativeBackground } from "@/components/DecorativeBackground";
 import { IdleTimeout } from "@/components/IdleTimeout";
+import { NavProgress } from "@/components/NavProgress";
 import { Avatar } from "@/components/Avatar";
 
 export default async function AppLayout({
@@ -37,6 +38,7 @@ export default async function AppLayout({
     <div className="min-h-screen flex flex-col">
       <DecorativeBackground />
       <IdleTimeout />
+      <NavProgress />
       <header className="bg-card/80 backdrop-blur sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4">
           <div className="flex items-center justify-between py-3">
@@ -121,7 +123,7 @@ export default async function AppLayout({
                 <Link href="/teacher/dashboard" className={navLink}>
                   {t("nav.dashboard")}
                   {openFlags > 0 && (
-                    <span className="ml-1 inline-flex items-center justify-center min-w-5 h-5 text-xs bg-warn text-paper rounded-full px-1">
+                    <span className="attention-pulse ml-1 inline-flex items-center justify-center min-w-5 h-5 text-xs bg-warn text-paper rounded-full px-1">
                       {openFlags}
                     </span>
                   )}

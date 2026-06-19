@@ -42,6 +42,8 @@ export default async function EditPostPage({
           allGrades: t("cohorts.allGrades"),
           dueResponse: t("post.dueResponseLabel"),
           dueReplies: t("post.dueRepliesLabel"),
+          dateLabel: t("post.dateLabel"),
+          timeLabel: t("post.timeLabel"),
           dueHint: t("post.dueHint"),
           attachments: t("post.attachmentsLabel"),
           submit: t("post.update"),

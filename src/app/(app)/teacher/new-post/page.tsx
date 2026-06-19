@@ -23,9 +23,9 @@ export default async function NewPostPage() {
     <div className="max-w-2xl">
       <Link
         href="/teacher/dashboard"
-        className="inline-flex items-center gap-1 text-sm text-ink-soft hover:text-ink mb-3"
+        className="inline-flex items-center gap-1.5 text-sm font-medium border border-line rounded-full px-4 py-1.5 text-ink-soft hover:bg-paper-deep hover:text-ink mb-4"
       >
-        ← {t("nav.dashboard")}
+        <span aria-hidden>←</span> {t("nav.dashboard")}
       </Link>
       <h1 className="font-display text-2xl mb-4">{t("post.newAssignment")}</h1>
       <PostForm
@@ -40,6 +40,8 @@ export default async function NewPostPage() {
           allGrades: t("cohorts.allGrades"),
           dueResponse: t("post.dueResponseLabel"),
           dueReplies: t("post.dueRepliesLabel"),
+          dateLabel: t("post.dateLabel"),
+          timeLabel: t("post.timeLabel"),
           dueHint: t("post.dueHint"),
           attachments: t("post.attachmentsLabel"),
           submit: t("post.publish"),

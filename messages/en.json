@@ -127,6 +127,8 @@
     "groupLabel": "Group",
     "dueResponseLabel": "Own response due",
     "dueRepliesLabel": "Peer replies due",
+    "dateLabel": "Date",
+    "timeLabel": "Time",
     "dueHint": "Leave empty for posts without deadlines (e.g. Coffee Corner).",
     "attachmentsLabel": "Attachments",
     "publish": "Publish",

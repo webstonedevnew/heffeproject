@@ -147,6 +147,9 @@ export async function setStudentCohort(formData: FormData) {
     .eq("id", studentId)
     .eq("role", "student");
   revalidatePath("/teacher/students");
+  // Redirect so the page re-renders fresh: the grade <select> is uncontrolled,
+  // so without a fresh mount it would snap back to its old default value.
+  redirect("/teacher/students");
 }
 
 /**

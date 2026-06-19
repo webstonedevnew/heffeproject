@@ -44,12 +44,16 @@ export default async function GroupsPage({
         {groups.map((group) => (
           <li
             key={group.id}
-            className={`lift bg-card border border-line rounded-lg p-4 ${
+            className={`lift relative bg-card border border-line rounded-lg p-4 ${
               group.archived_at ? "opacity-60" : ""
             }`}
           >
             <h2 className="font-display text-lg leading-snug">
-              <Link href={`/groups/${group.slug}`} className="hover:text-accent">
+              {/* Stretched link: the whole card is clickable, not just the text. */}
+              <Link
+                href={`/groups/${group.slug}`}
+                className="hover:text-accent after:absolute after:inset-0 after:content-['']"
+              >
                 {group.name}
               </Link>
               {group.archived_at && (
@@ -66,7 +70,7 @@ export default async function GroupsPage({
             </p>
 
             {isTeacher && (
-              <div className="flex flex-wrap gap-3 mt-3 pt-2 border-t border-line/60 text-xs">
+              <div className="relative z-10 flex flex-wrap gap-3 mt-3 pt-2 border-t border-line/60 text-xs">
                 <details>
                   <summary className="cursor-pointer underline text-ink-soft">
                     {t("groups.rename")}
