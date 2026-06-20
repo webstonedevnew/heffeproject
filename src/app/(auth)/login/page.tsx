@@ -28,6 +28,8 @@ export default async function LoginPage({
     invalid: t("auth.errorInvalid"),
     code: t("auth.codeError"),
     existing: t("auth.errorExisting"),
+    oauth: t("auth.errorOauth"),
+    provision: t("auth.errorProvision"),
   };
   const idle = params.error === "idle";
   const error =

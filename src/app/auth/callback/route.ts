@@ -20,16 +20,22 @@ export async function GET(request: NextRequest) {
   const fail = (err: string) =>
     NextResponse.redirect(new URL(`/login?error=${err}`, request.url));
 
-  if (!code) return fail("invalid");
+  if (!code) return fail("oauth");
 
   const supabase = await createClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) return fail("invalid");
+  if (error) {
+    console.error("[auth/callback] exchangeCodeForSession failed:", error.message);
+    return fail("oauth");
+  }
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return fail("invalid");
+  if (!user) {
+    console.error("[auth/callback] no user after exchange");
+    return fail("oauth");
+  }
 
   // Already provisioned (returning OAuth user, or magic-link login) → let in.
   const { data: profile } = await supabase
@@ -85,7 +91,10 @@ export async function GET(request: NextRequest) {
     status: "active",
     cohort_id: invite.cohort_id,
   });
-  if (insertError) return reject("invalid");
+  if (insertError) {
+    console.error("[auth/callback] profile provisioning failed:", insertError.message);
+    return reject("provision");
+  }
 
   await admin
     .from("invites")
