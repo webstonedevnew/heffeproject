@@ -28,7 +28,17 @@ export async function GET(request: NextRequest) {
     return fail(err);
   };
 
-  if (!code) return failOut("oauth");
+  if (!code) {
+    // Google/Supabase redirected back with an error instead of a code — this is
+    // where provider-config problems (consent screen, redirect URI, keys) show.
+    const providerError =
+      searchParams.get("error_description") || searchParams.get("error");
+    console.error(
+      "[auth/callback] no code — provider error:",
+      providerError ?? "(none)"
+    );
+    return failOut("oauth");
+  }
 
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
