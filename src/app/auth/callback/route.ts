@@ -20,13 +20,20 @@ export async function GET(request: NextRequest) {
   const fail = (err: string) =>
     NextResponse.redirect(new URL(`/login?error=${err}`, request.url));
 
-  if (!code) return fail("oauth");
-
   const supabase = await createClient();
+  // A failed sign-in must never leave a previous session active (e.g. a teacher
+  // logged in on a shared browser) — always clear it before bouncing to /login.
+  const failOut = async (err: string) => {
+    await supabase.auth.signOut().catch(() => {});
+    return fail(err);
+  };
+
+  if (!code) return failOut("oauth");
+
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) {
     console.error("[auth/callback] exchangeCodeForSession failed:", error.message);
-    return fail("oauth");
+    return failOut("oauth");
   }
 
   const {
@@ -34,7 +41,7 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) {
     console.error("[auth/callback] no user after exchange");
-    return fail("oauth");
+    return failOut("oauth");
   }
 
   // Already provisioned (returning OAuth user, or magic-link login) → let in.
