@@ -77,11 +77,11 @@ export default async function LoginPage({
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     pattern="[0-9]*"
-                    maxLength={6}
+                    maxLength={10}
                     required
                     autoFocus
-                    placeholder="000000"
-                    className="w-full border border-line rounded px-3 py-2.5 bg-paper text-center text-2xl tracking-[0.4em] font-mono focus:border-accent"
+                    placeholder="••••••"
+                    className="w-full border border-line rounded px-3 py-2.5 bg-paper text-center text-2xl tracking-[0.3em] font-mono focus:border-accent"
                   />
                 </div>
                 <SubmitButton className="w-full bg-ink text-paper rounded px-4 py-2.5 font-medium hover:bg-accent">
