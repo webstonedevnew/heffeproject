@@ -157,29 +157,8 @@ export default async function TeacherDashboardPage() {
     },
   ];
 
-  const action =
-    "rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors";
-
   return (
     <div className="animate-fade-in-up">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
-        <h1 className="font-display text-2xl">{t("dashboard.title")}</h1>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/teacher/new-post" className={`${action} bg-ink text-paper hover:bg-accent`}>
-            + {t("nav.newPost")}
-          </Link>
-          <Link href="/teacher/students" className={`${action} border border-line hover:bg-paper-deep`}>
-            {t("dashboard.manageStudentsLink")}
-          </Link>
-          <Link href="/teacher/participation" className={`${action} border border-line hover:bg-paper-deep`}>
-            {t("dashboard.openParticipation")}
-          </Link>
-          <Link href="/teacher/flags" className={`${action} border border-line hover:bg-paper-deep`}>
-            {t("dashboard.openFlagsLink")}
-          </Link>
-        </div>
-      </div>
-
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger">
         {cards.map((c) => (

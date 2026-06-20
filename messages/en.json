@@ -44,6 +44,10 @@
   },
   "dashboard": {
     "title": "Teacher dashboard",
+    "tabOverview": "Overview",
+    "tabStudents": "Students & invites",
+    "tabParticipation": "Participation",
+    "tabFlags": "Flags",
     "students": "Active students",
     "assignments": "Assignments",
     "withDeadlines": "{count} with deadlines",
