@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { requireTeacher } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getT } from "@/lib/i18n";
@@ -41,13 +40,7 @@ export default async function StudentsPage({
   const allGradesLabel = t("cohorts.allGrades");
 
   return (
-    <div className="max-w-2xl">
-      <Link
-        href="/teacher/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm font-medium border border-line rounded-full px-4 py-1.5 text-ink-soft hover:bg-paper-deep hover:text-ink mb-4"
-      >
-        <span aria-hidden>←</span> {t("nav.dashboard")}
-      </Link>
+    <div className="max-w-2xl animate-fade-in">
       <h1 className="font-display text-2xl mb-4">{t("students.title")}</h1>
 
       {sp.sent && Number(sp.sent) > 0 && (

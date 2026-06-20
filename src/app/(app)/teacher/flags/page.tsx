@@ -47,13 +47,7 @@ export default async function FlagsPage({
   const flags = (data ?? []) as unknown as FlagRow[];
 
   return (
-    <div className="max-w-2xl">
-      <Link
-        href="/teacher/dashboard"
-        className="inline-flex items-center gap-1.5 text-sm font-medium border border-line rounded-full px-4 py-1.5 text-ink-soft hover:bg-paper-deep hover:text-ink mb-4"
-      >
-        <span aria-hidden>←</span> {t("nav.dashboard")}
-      </Link>
+    <div className="max-w-2xl animate-fade-in">
       <div className="flex items-center justify-between mb-4">
         <h1 className="font-display text-2xl">{t("flagsPage.title")}</h1>
         <Link

@@ -44,6 +44,10 @@
   },
   "dashboard": {
     "title": "Tanári áttekintés",
+    "tabOverview": "Áttekintés",
+    "tabStudents": "Diákok és meghívók",
+    "tabParticipation": "Részvétel",
+    "tabFlags": "Jelentések",
     "students": "Aktív diákok",
     "assignments": "Feladatok",
     "withDeadlines": "{count} határidővel",
