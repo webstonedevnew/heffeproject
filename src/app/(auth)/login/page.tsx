@@ -2,6 +2,7 @@ import { getT } from "@/lib/i18n";
 import type { Locale } from "@/types/db";
 import { DecorativeBackground } from "@/components/DecorativeBackground";
 import { SubmitButton } from "@/components/SubmitButton";
+import { GoogleButton } from "@/components/GoogleButton";
 import { sendMagicLink, passwordSignIn, verifyMagicCode } from "./actions";
 
 export const metadata = { title: "Sign in" };
@@ -26,6 +27,7 @@ export default async function LoginPage({
     noaccount: t("auth.errorNoAccount"),
     invalid: t("auth.errorInvalid"),
     code: t("auth.codeError"),
+    existing: t("auth.errorExisting"),
   };
   const idle = params.error === "idle";
   const error =
@@ -99,6 +101,16 @@ export default async function LoginPage({
             <>
               <h2 className="font-display text-xl mb-1">{t("auth.signInTitle")}</h2>
               <p className="text-sm text-ink-soft mb-4">{t("auth.signInIntro")}</p>
+
+              <GoogleButton
+                label={t("auth.continueWithGoogle")}
+                errorLabel={t("auth.googleError")}
+              />
+              <div className="flex items-center gap-3 my-4 text-xs text-ink-faint">
+                <span className="flex-1 h-px bg-line" />
+                {t("auth.or")}
+                <span className="flex-1 h-px bg-line" />
+              </div>
 
               <form action={sendMagicLink} className="space-y-3">
                 <div>
