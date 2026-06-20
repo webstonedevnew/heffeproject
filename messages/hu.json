@@ -76,6 +76,8 @@
     "googleError": "Nem sikerült elindítani a Google-bejelentkezést. Engedélyezve van a Google szolgáltató a Supabase-ben?",
     "or": "vagy",
     "errorExisting": "Ehhez az e-mailhez már tartozik fiók. Jelentkezz be e-mail-kóddal vagy jelszóval.",
+    "errorOauth": "A Google-bejelentkezést nem sikerült befejezni. Próbáld újra.",
+    "errorProvision": "Nem sikerült befejezni a fiók létrehozását. Szólj a tanárodnak (a szerver nem tudta menteni a profilt — valószínűleg a service-role kulcs).",
     "sendMagicLink": "Bejelentkezési link küldése",
     "magicLinkSent": "Nézd meg a postaládádat — úton a bejelentkezési link.",
     "checkEmailTitle": "Nézd meg az e-mailed",

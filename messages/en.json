@@ -76,6 +76,8 @@
     "googleError": "Couldn't start Google sign-in. Is the Google provider enabled in Supabase?",
     "or": "or",
     "errorExisting": "This email already has an account. Sign in with your email code or password instead.",
+    "errorOauth": "Google sign-in couldn't be completed. Please try again.",
+    "errorProvision": "Couldn't finish creating your account. Ask your teacher (the server couldn't save your profile — likely the service-role key).",
     "sendMagicLink": "Email me a sign-in link",
     "magicLinkSent": "Check your inbox — your sign-in link is on its way.",
     "checkEmailTitle": "Check your email",
