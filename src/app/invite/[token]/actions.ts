@@ -84,14 +84,16 @@ export async function acceptInvite(formData: FormData) {
     if (!error) redirect("/");
   }
 
-  // Otherwise email a magic link and tell them to check their inbox.
+  // Otherwise email a sign-in code + link, then send them to the code screen
+  // (entering the code there signs in this device, even if the email is opened
+  // on their phone).
   const supabase = await createClient();
   await supabase.auth.signInWithOtp({
     email: invite.email,
     options: {
       shouldCreateUser: false,
-      emailRedirectTo: siteUrl("/auth/callback"),
+      emailRedirectTo: siteUrl("/auth/confirm"),
     },
   });
-  redirect(`/invite/${token}?done=1`);
+  redirect(`/login?sent=1&email=${encodeURIComponent(invite.email)}`);
 }
