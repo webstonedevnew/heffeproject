@@ -38,9 +38,10 @@ export async function sendMagicLink(formData: FormData) {
  */
 export async function verifyMagicCode(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  // Codes are 6–10 digits depending on the Supabase "Email OTP Length" setting.
   const token = String(formData.get("token") ?? "").replace(/\D/g, "");
   const back = `/login?sent=1&email=${encodeURIComponent(email)}`;
-  if (!email || token.length < 6) redirect(`${back}&error=code`);
+  if (!email || token.length < 4) redirect(`${back}&error=code`);
 
   const supabase = await createClient();
   const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });

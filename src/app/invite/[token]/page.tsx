@@ -4,6 +4,7 @@ import { inviteProblem } from "@/lib/invites";
 import { getT } from "@/lib/i18n";
 import { DecorativeBackground } from "@/components/DecorativeBackground";
 import { SubmitButton } from "@/components/SubmitButton";
+import { GoogleButton } from "@/components/GoogleButton";
 import type { Invite, Locale } from "@/types/db";
 import { acceptInvite } from "./actions";
 
@@ -95,6 +96,19 @@ export default async function InvitePage({
           {t("common.error")}
         </p>
       )}
+
+      <GoogleButton
+        label={t("auth.continueWithGoogle")}
+        errorLabel={t("auth.googleError")}
+      />
+      <p className="text-xs text-ink-faint mt-1.5">
+        {t("invite.googleHint", { email: invite.email })}
+      </p>
+      <div className="flex items-center gap-3 my-4 text-xs text-ink-faint">
+        <span className="flex-1 h-px bg-line" />
+        {t("auth.or")}
+        <span className="flex-1 h-px bg-line" />
+      </div>
 
       <form action={acceptInvite} className="space-y-3">
         <input type="hidden" name="token" value={token} />
